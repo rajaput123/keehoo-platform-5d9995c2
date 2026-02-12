@@ -52,7 +52,7 @@ import { cn } from "@/lib/utils";
 import SearchableSelect from "@/components/SearchableSelect";
 import CustomFieldsSection from "@/components/CustomFieldsSection";
 import TenantSubscriptionTab from "@/components/TenantSubscriptionTab";
-import { tenants, getSubscriptionByTenantId, getPlanById } from "@/data/mockSubscriptions";
+import { tenants, getSubscriptionByTenantId, getPlanById, getTenantUsageSummary, canPerformAction, type UsageModule } from "@/data/mockSubscriptions";
 
 const adminUsers = [
   { name: "Ramesh Kumar", email: "ramesh@temple.org", role: "Super Admin", status: "Active", lastLogin: "2 hours ago", mfa: true },
@@ -60,13 +60,7 @@ const adminUsers = [
   { name: "Suresh Pillai", email: "suresh@temple.org", role: "Manager", status: "Inactive", lastLogin: "30 days ago", mfa: true },
 ];
 
-const usageMetrics = [
-  { metric: "Bookings", current: 8432, limit: 10000, percentage: 84 },
-  { metric: "Storage", current: 4.2, limit: 5, percentage: 84, unit: "GB" },
-  { metric: "API Calls", current: 45000, limit: 50000, percentage: 90 },
-  { metric: "Active Users", current: 12, limit: 15, percentage: 80 },
-  { metric: "Branches", current: 3, limit: 5, percentage: 60 },
-];
+// Usage metrics are now derived from subscription data via getTenantUsageSummary
 
 const featureToggles = [
   { feature: "Booking System", enabled: true, effectiveDate: "2024-01-15" },
@@ -283,30 +277,46 @@ const AllTenants = () => {
             </TabsContent>
 
             <TabsContent value="usage" className="mt-4 space-y-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-semibold">Usage & Limits</h4>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Auto Restrict on Over-limit</span>
-                  <Switch />
-                </div>
-              </div>
-              <div className="space-y-4">
-                {usageMetrics.map((metric) => (
-                  <div key={metric.metric} className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm font-medium">{metric.metric}</span>
-                      <span className="text-sm">
-                        <span className={cn(metric.percentage >= 90 ? "text-destructive font-semibold" : "text-foreground")}>{metric.current.toLocaleString()}{metric.unit}</span>
-                        <span className="text-muted-foreground"> / {metric.limit.toLocaleString()}{metric.unit}</span>
-                      </span>
+              {(() => {
+                const summary = getTenantUsageSummary(selectedTenant.id);
+                if (!summary) return <p className="text-sm text-muted-foreground">No usage data available.</p>;
+                return (
+                  <>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold">Usage & Limits (from Subscription)</h4>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">Auto Restrict on Over-limit</span>
+                        <Switch />
+                      </div>
                     </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div className={cn("h-full rounded-full transition-all", metric.percentage >= 90 ? "bg-destructive" : metric.percentage >= 75 ? "bg-warning" : "bg-primary")} style={{ width: `${metric.percentage}%` }} />
+                    <div className="space-y-4">
+                      {summary.modules.map((mod) => (
+                        <div key={mod.module} className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm font-medium">{mod.label}</span>
+                            <span className="text-sm">
+                              <span className={cn(mod.percentage >= 90 ? "text-destructive font-semibold" : "text-foreground")}>
+                                {mod.unit ? mod.used : mod.used.toLocaleString()}{mod.unit ? ` ${mod.unit}` : ""}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {" "}/ {mod.unit ? mod.limit : mod.limit.toLocaleString()}{mod.unit ? ` ${mod.unit}` : ""}
+                              </span>
+                            </span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className={cn("h-full rounded-full transition-all", mod.percentage >= 100 ? "bg-destructive" : mod.percentage >= 75 ? "bg-warning" : "bg-primary")}
+                              style={{ width: `${Math.min(mod.percentage, 100)}%` }}
+                            />
+                          </div>
+                          {mod.status === "over-limit" && <p className="text-xs text-destructive">⚠️ Over limit by {mod.percentage - 100}%</p>}
+                          {mod.status === "near-limit" && <p className="text-xs text-warning">⚠️ Approaching limit</p>}
+                        </div>
+                      ))}
                     </div>
-                    {metric.percentage >= 90 && <p className="text-xs text-destructive">⚠️ Approaching limit</p>}
-                  </div>
-                ))}
-              </div>
+                  </>
+                );
+              })()}
             </TabsContent>
 
             <TabsContent value="features" className="mt-4">
