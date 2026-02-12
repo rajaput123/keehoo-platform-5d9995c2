@@ -19,7 +19,7 @@ import AuditHistory from "./pages/domain/AuditHistory";
 import OnboardingLayout from "./components/OnboardingLayout";
 import OnboardingOverview from "./pages/onboarding/Overview";
 import RegistrationPipeline from "./pages/onboarding/RegistrationPipeline";
-import VerificationQueue from "./pages/onboarding/VerificationQueue";
+
 import DirectOnboarding from "./pages/onboarding/DirectOnboarding";
 
 import ApprovalLogs from "./pages/onboarding/ApprovalLogs";
@@ -69,7 +69,7 @@ const App = () => {
               <Route index element={<Navigate to="overview" replace />} />
               <Route path="overview" element={<OnboardingOverview />} />
               <Route path="registration-pipeline" element={<RegistrationPipeline />} />
-              <Route path="verification-queue" element={<VerificationQueue />} />
+              
               <Route path="direct-onboarding" element={<DirectOnboarding />} />
               
               <Route path="approval-logs" element={<ApprovalLogs />} />

@@ -4,9 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   ClipboardList,
-  ShieldCheck,
   UserPlus,
-  
   FileCheck,
   Search,
   Bell,
@@ -44,12 +42,6 @@ const sidebarItems = [
     icon: ClipboardList, 
     path: "/domain/onboarding/registration-pipeline", 
     description: "Manage temple self-registration submissions" 
-  },
-  { 
-    label: "Verification Queue", 
-    icon: ShieldCheck, 
-    path: "/domain/onboarding/verification-queue", 
-    description: "Document verification and compliance checks" 
   },
   { 
     label: "Direct Onboarding", 
