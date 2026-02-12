@@ -6,7 +6,7 @@ import {
   XCircle, 
   Building2, 
   TrendingUp,
-  AlertTriangle,
+  
   Timer,
   MapPin,
   Activity,
@@ -35,11 +35,8 @@ const funnelStages = [
   { stage: "Activated", count: 2089, percentage: 73.4 },
 ];
 
-const highRiskCases = [
-  { id: "REG-4521", temple: "Sri Lakshmi Temple", risk: "High", reason: "Document mismatch", region: "Tamil Nadu", score: 85 },
-  { id: "REG-4518", temple: "Kashi Vishwanath Trust", risk: "High", reason: "Duplicate detected", region: "Uttar Pradesh", score: 78 },
-  { id: "REG-4515", temple: "Jagannath Mandir", risk: "Medium", reason: "Incomplete KYC", region: "Odisha", score: 55 },
-];
+
+
 
 const regionSummary = [
   { region: "Tamil Nadu", registrations: 487, approved: 412, pending: 45, rejected: 30, growth: "+12%" },
@@ -65,11 +62,8 @@ const slaMetrics = [
   { metric: "Overdue Cases", value: "12", target: "0", status: "warning" },
 ];
 
-const riskColors: Record<string, string> = {
-  High: "bg-destructive/10 text-destructive",
-  Medium: "bg-warning/10 text-warning",
-  Low: "bg-success/10 text-success",
-};
+
+
 
 const activityTypeColors: Record<string, string> = {
   approved: "text-success",
@@ -189,46 +183,6 @@ const Overview = () => {
 
       {/* Second Row */}
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        {/* High Risk Cases */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="glass-card rounded-2xl glass-shadow overflow-hidden"
-        >
-          <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
-            <h2 className="font-semibold text-foreground flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-warning" />
-              High Risk Cases
-            </h2>
-            <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded-full font-medium">
-              {highRiskCases.filter(s => s.risk === "High").length} Critical
-            </span>
-          </div>
-          <div className="divide-y divide-border/50 max-h-[280px] overflow-auto">
-            {highRiskCases.map((item, i) => (
-              <motion.div 
-                key={item.id} 
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.05 }}
-                className="px-5 py-3.5 hover:bg-muted/30 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-medium text-foreground truncate pr-2">{item.temple}</p>
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${riskColors[item.risk]}`}>
-                    {item.score}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">{item.reason}</p>
-                  <p className="text-xs text-muted-foreground">{item.region}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
         {/* Region Summary */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

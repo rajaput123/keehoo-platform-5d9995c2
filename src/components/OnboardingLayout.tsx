@@ -6,7 +6,7 @@ import {
   ClipboardList,
   ShieldCheck,
   UserPlus,
-  AlertTriangle,
+  
   FileCheck,
   Search,
   Bell,
@@ -57,12 +57,8 @@ const sidebarItems = [
     path: "/domain/onboarding/direct-onboarding", 
     description: "Platform-initiated temple and tenant creation" 
   },
-  { 
-    label: "Compliance & Risk", 
-    icon: AlertTriangle, 
-    path: "/domain/onboarding/compliance-risk", 
-    description: "Risk monitoring and compliance oversight" 
-  },
+
+
   { 
     label: "Approval Logs", 
     icon: FileCheck, 

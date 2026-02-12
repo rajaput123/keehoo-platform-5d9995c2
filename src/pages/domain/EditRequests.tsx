@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Eye, Check, X, MessageSquare, ArrowLeft, User, History, AlertTriangle, ArrowRight } from "lucide-react";
+import { Search, Eye, Check, X, MessageSquare, ArrowLeft, User, History, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,7 +25,6 @@ interface EditRequest {
   status: "Pending" | "Approved" | "Rejected";
   currentValue: string;
   proposedValue: string;
-  riskScore: number;
 }
 
 const mockData: EditRequest[] = [
@@ -41,7 +40,6 @@ const mockData: EditRequest[] = [
     status: "Pending",
     currentValue: "+91 183 255 3954",
     proposedValue: "+91 183 255 3955 (Updated main line)",
-    riskScore: 15
   },
   { 
     id: "2", 
@@ -55,7 +53,6 @@ const mockData: EditRequest[] = [
     status: "Pending",
     currentValue: "6:00 AM - 9:00 PM",
     proposedValue: "3:00 AM - 12:00 AM (Extended for festival season)",
-    riskScore: 8
   },
   { 
     id: "3", 
@@ -69,7 +66,6 @@ const mockData: EditRequest[] = [
     status: "Approved",
     currentValue: "Ancient temple dedicated to Lord Shiva",
     proposedValue: "Ancient temple dedicated to Lord Shiva, part of Char Dham pilgrimage. Located at an altitude of 3,583m.",
-    riskScore: 5
   },
   { 
     id: "4", 
@@ -83,7 +79,6 @@ const mockData: EditRequest[] = [
     status: "Rejected",
     currentValue: "Grand Road, Puri, Odisha 752001",
     proposedValue: "Bada Danda, Puri, Odisha 752001",
-    riskScore: 45
   },
   { 
     id: "5", 
@@ -97,7 +92,6 @@ const mockData: EditRequest[] = [
     status: "Pending",
     currentValue: "Lord Shiva",
     proposedValue: "Lord Shiva (Jyotirlinga - First among 12)",
-    riskScore: 10
   },
   { 
     id: "6", 
@@ -111,7 +105,6 @@ const mockData: EditRequest[] = [
     status: "Approved",
     currentValue: "One of the most famous Hindu temples",
     proposedValue: "One of the most famous Hindu temples dedicated to Lord Shiva. The temple stands on the western bank of the holy river Ganga, and is one of the twelve Jyotirlingas.",
-    riskScore: 3
   },
 ];
 
@@ -127,11 +120,8 @@ const statusColors: Record<string, string> = {
   Rejected: "bg-destructive/10 text-destructive",
 };
 
-const getRiskColor = (score: number) => {
-  if (score >= 70) return "text-destructive bg-destructive/10";
-  if (score >= 40) return "text-warning bg-warning/10";
-  return "text-success bg-success/10";
-};
+
+
 
 const EditRequests = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -288,24 +278,8 @@ const EditRequests = () => {
                 </div>
               </div>
 
-              {/* Risk Indicator */}
-              <div className="bg-card rounded-lg border card-shadow p-5">
-                <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                  Risk Assessment
-                </h2>
-                <div className="flex items-center gap-4">
-                  <div className={cn("text-3xl font-bold px-4 py-2 rounded-lg", getRiskColor(selectedRequest.riskScore))}>
-                    {selectedRequest.riskScore}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {selectedRequest.riskScore >= 70 ? "High Risk" : selectedRequest.riskScore >= 40 ? "Medium Risk" : "Low Risk"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Based on change type and contributor history</p>
-                  </div>
-                </div>
-              </div>
+
+
             </div>
           </div>
 

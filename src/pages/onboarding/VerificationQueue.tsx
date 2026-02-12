@@ -55,7 +55,7 @@ const verificationQueue = [
     verificationStatus: "In Progress",
     assignedVerifier: "Verifier A",
     slaRemaining: "1d 2h",
-    riskLevel: "Medium",
+    
     region: "Uttar Pradesh",
     submittedAt: "2024-01-15"
   },
@@ -69,7 +69,6 @@ const verificationQueue = [
     verificationStatus: "Pending",
     assignedVerifier: "Unassigned",
     slaRemaining: "2d 4h",
-    riskLevel: "Low",
     region: "Karnataka",
     submittedAt: "2024-01-15"
   },
@@ -83,7 +82,6 @@ const verificationQueue = [
     verificationStatus: "Completed",
     assignedVerifier: "Verifier B",
     slaRemaining: "—",
-    riskLevel: "Low",
     region: "Andhra Pradesh",
     submittedAt: "2024-01-14"
   },
@@ -97,7 +95,6 @@ const verificationQueue = [
     verificationStatus: "Issues Found",
     assignedVerifier: "Verifier A",
     slaRemaining: "4h",
-    riskLevel: "High",
     region: "Tamil Nadu",
     submittedAt: "2024-01-15"
   },
@@ -125,11 +122,8 @@ const docStatusColors: Record<string, string> = {
   "Rejected": "bg-destructive/10 text-destructive",
 };
 
-const riskColors: Record<string, string> = {
-  "Low": "bg-success/10 text-success",
-  "Medium": "bg-warning/10 text-warning",
-  "High": "bg-destructive/10 text-destructive",
-};
+
+
 
 const verifierOptions = [
   { value: "verifier-a", label: "Verifier A" },
@@ -302,7 +296,7 @@ const VerificationQueue = () => {
               <TableHead>Temple</TableHead>
               <TableHead>Documents</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Risk</TableHead>
+              
               <TableHead>Verifier</TableHead>
               <TableHead>SLA</TableHead>
               <TableHead className="w-[80px]">Actions</TableHead>
@@ -344,11 +338,8 @@ const VerificationQueue = () => {
                     {item.verificationStatus}
                   </Badge>
                 </TableCell>
-                <TableCell>
-                  <Badge className={riskColors[item.riskLevel]} variant="secondary">
-                    {item.riskLevel}
-                  </Badge>
-                </TableCell>
+
+
                 <TableCell className="text-sm">{item.assignedVerifier}</TableCell>
                 <TableCell>
                   <span className={`text-xs font-medium ${
