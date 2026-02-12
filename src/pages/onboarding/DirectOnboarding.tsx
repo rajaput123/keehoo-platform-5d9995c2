@@ -67,7 +67,7 @@ const recentOnboardings = [
   { 
     id: "ONB-2001", 
     templeName: "Sri Padmanabhaswamy Temple", 
-    tenantId: "TEN-5001",
+    
     region: "Kerala",
     status: "Activated",
     createdBy: "Admin A",
@@ -77,7 +77,7 @@ const recentOnboardings = [
   { 
     id: "ONB-2000", 
     templeName: "Meenakshi Amman Temple", 
-    tenantId: "TEN-5000",
+    
     region: "Tamil Nadu",
     status: "Pending Activation",
     createdBy: "Admin B",
@@ -87,7 +87,7 @@ const recentOnboardings = [
   { 
     id: "ONB-1999", 
     templeName: "Jagannath Temple", 
-    tenantId: null,
+    
     region: "Odisha",
     status: "In Progress",
     createdBy: "Admin A",
@@ -772,7 +772,7 @@ const DirectOnboarding = () => {
               </TableHead>
               <TableHead className="w-[100px]">ID</TableHead>
               <TableHead>Temple</TableHead>
-              <TableHead>Tenant ID</TableHead>
+              
               <TableHead>Region</TableHead>
               <TableHead>Progress</TableHead>
               <TableHead>Status</TableHead>
@@ -791,7 +791,7 @@ const DirectOnboarding = () => {
                 </TableCell>
                 <TableCell className="font-mono text-xs">{item.id}</TableCell>
                 <TableCell className="font-medium">{item.templeName}</TableCell>
-                <TableCell className="text-sm">{item.tenantId || "—"}</TableCell>
+                
                 <TableCell className="text-sm">{item.region}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
