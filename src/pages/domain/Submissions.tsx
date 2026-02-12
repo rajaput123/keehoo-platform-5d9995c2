@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Download, Eye, Check, X, AlertTriangle, MapPin, User, Clock, Image, FileText, ArrowLeft, Copy, MessageSquare } from "lucide-react";
+import { Search, Download, Eye, Check, X, MapPin, User, Clock, Image, FileText, ArrowLeft, Copy, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,7 +26,7 @@ interface Submission {
   source: "Devotee" | "Scraped" | "Platform";
   date: string;
   status: "Draft" | "Submitted" | "Under Review" | "Approved" | "Published" | "Rejected";
-  riskScore: number;
+  
   description?: string;
   address?: string;
   timings?: string;
@@ -35,14 +35,14 @@ interface Submission {
 }
 
 const mockData: Submission[] = [
-  { id: "1", temple: "Sri Meenakshi Temple", city: "Madurai", state: "TN", submittedBy: "Lakshmi R.", submitterEmail: "lakshmi@example.com", submitterSubmissions: 15, submitterApprovalRate: 93, source: "Devotee", date: "Feb 6, 2026", status: "Submitted", riskScore: 12, description: "Ancient Dravidian temple dedicated to Goddess Meenakshi", address: "Madurai, Tamil Nadu 625001", timings: "5:00 AM - 12:30 PM, 4:00 PM - 10:00 PM", deity: "Goddess Meenakshi" },
-  { id: "2", temple: "Jagannath Temple", city: "Puri", state: "OD", submittedBy: "Suresh M.", submitterEmail: "suresh@example.com", submitterSubmissions: 8, submitterApprovalRate: 75, source: "Platform", date: "Feb 5, 2026", status: "Approved", riskScore: 8, description: "Famous temple dedicated to Lord Jagannath", deity: "Lord Jagannath" },
-  { id: "3", temple: "Unknown Temple", city: "Varanasi", state: "UP", submittedBy: "Amit K.", submitterEmail: "amit@example.com", submitterSubmissions: 2, submitterApprovalRate: 50, source: "Scraped", date: "Feb 5, 2026", status: "Rejected", riskScore: 85, description: "Temple data scraped from web" },
-  { id: "4", temple: "Tirupati Balaji", city: "Tirupati", state: "AP", submittedBy: "Priya P.", submitterEmail: "priya@example.com", submitterSubmissions: 56, submitterApprovalRate: 98, source: "Devotee", date: "Feb 4, 2026", status: "Under Review", riskScore: 5, description: "One of the most visited religious sites in the world", deity: "Lord Venkateswara" },
-  { id: "5", temple: "Golden Temple", city: "Amritsar", state: "PB", submittedBy: "Harpreet S.", submitterEmail: "harpreet@example.com", submitterSubmissions: 24, submitterApprovalRate: 92, source: "Devotee", date: "Feb 4, 2026", status: "Submitted", riskScore: 10 },
-  { id: "6", temple: "Somnath Temple", city: "Gir Somnath", state: "GJ", submittedBy: "Ravi D.", submitterEmail: "ravi@example.com", submitterSubmissions: 12, submitterApprovalRate: 83, source: "Platform", date: "Feb 3, 2026", status: "Published", riskScore: 3 },
-  { id: "7", temple: "Kedarnath Temple", city: "Rudraprayag", state: "UK", submittedBy: "Ananya S.", submitterEmail: "ananya@example.com", submitterSubmissions: 5, submitterApprovalRate: 60, source: "Devotee", date: "Feb 3, 2026", status: "Submitted", riskScore: 35 },
-  { id: "8", temple: "Ramanathaswamy", city: "Rameswaram", state: "TN", submittedBy: "Deepa M.", submitterEmail: "deepa@example.com", submitterSubmissions: 42, submitterApprovalRate: 95, source: "Devotee", date: "Feb 2, 2026", status: "Published", riskScore: 2 },
+  { id: "1", temple: "Sri Meenakshi Temple", city: "Madurai", state: "TN", submittedBy: "Lakshmi R.", submitterEmail: "lakshmi@example.com", submitterSubmissions: 15, submitterApprovalRate: 93, source: "Devotee", date: "Feb 6, 2026", status: "Submitted", description: "Ancient Dravidian temple dedicated to Goddess Meenakshi", address: "Madurai, Tamil Nadu 625001", timings: "5:00 AM - 12:30 PM, 4:00 PM - 10:00 PM", deity: "Goddess Meenakshi" },
+  { id: "2", temple: "Jagannath Temple", city: "Puri", state: "OD", submittedBy: "Suresh M.", submitterEmail: "suresh@example.com", submitterSubmissions: 8, submitterApprovalRate: 75, source: "Platform", date: "Feb 5, 2026", status: "Approved", description: "Famous temple dedicated to Lord Jagannath", deity: "Lord Jagannath" },
+  { id: "3", temple: "Unknown Temple", city: "Varanasi", state: "UP", submittedBy: "Amit K.", submitterEmail: "amit@example.com", submitterSubmissions: 2, submitterApprovalRate: 50, source: "Scraped", date: "Feb 5, 2026", status: "Rejected", description: "Temple data scraped from web" },
+  { id: "4", temple: "Tirupati Balaji", city: "Tirupati", state: "AP", submittedBy: "Priya P.", submitterEmail: "priya@example.com", submitterSubmissions: 56, submitterApprovalRate: 98, source: "Devotee", date: "Feb 4, 2026", status: "Under Review", description: "One of the most visited religious sites in the world", deity: "Lord Venkateswara" },
+  { id: "5", temple: "Golden Temple", city: "Amritsar", state: "PB", submittedBy: "Harpreet S.", submitterEmail: "harpreet@example.com", submitterSubmissions: 24, submitterApprovalRate: 92, source: "Devotee", date: "Feb 4, 2026", status: "Submitted" },
+  { id: "6", temple: "Somnath Temple", city: "Gir Somnath", state: "GJ", submittedBy: "Ravi D.", submitterEmail: "ravi@example.com", submitterSubmissions: 12, submitterApprovalRate: 83, source: "Platform", date: "Feb 3, 2026", status: "Published" },
+  { id: "7", temple: "Kedarnath Temple", city: "Rudraprayag", state: "UK", submittedBy: "Ananya S.", submitterEmail: "ananya@example.com", submitterSubmissions: 5, submitterApprovalRate: 60, source: "Devotee", date: "Feb 3, 2026", status: "Submitted" },
+  { id: "8", temple: "Ramanathaswamy", city: "Rameswaram", state: "TN", submittedBy: "Deepa M.", submitterEmail: "deepa@example.com", submitterSubmissions: 42, submitterApprovalRate: 95, source: "Devotee", date: "Feb 2, 2026", status: "Published" },
 ];
 
 const duplicateSuggestions = [
@@ -65,28 +65,20 @@ const sourceColors: Record<string, string> = {
   Platform: "bg-info/10 text-info",
 };
 
-const getRiskColor = (score: number) => {
-  if (score >= 70) return "text-destructive bg-destructive/10";
-  if (score >= 40) return "text-warning bg-warning/10";
-  return "text-success bg-success/10";
-};
+
+
 
 const Submissions = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
-  const [riskFilter, setRiskFilter] = useState<string>("all");
+  
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
   const filtered = mockData
     .filter((s) => statusFilter === "all" || s.status === statusFilter)
     .filter((s) => sourceFilter === "all" || s.source === sourceFilter)
-    .filter((s) => {
-      if (riskFilter === "all") return true;
-      if (riskFilter === "high") return s.riskScore >= 70;
-      if (riskFilter === "medium") return s.riskScore >= 40 && s.riskScore < 70;
-      return s.riskScore < 40;
-    });
+;
 
   const toggleAll = () => {
     if (selected.size === filtered.length) {
@@ -241,24 +233,8 @@ const Submissions = () => {
                 )}
               </div>
 
-              {/* Risk Score */}
-              <div className="bg-card rounded-lg border card-shadow p-5">
-                <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                  Risk Assessment
-                </h2>
-                <div className="flex items-center gap-4">
-                  <div className={cn("text-3xl font-bold px-4 py-2 rounded-lg", getRiskColor(selectedSubmission.riskScore))}>
-                    {selectedSubmission.riskScore}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {selectedSubmission.riskScore >= 70 ? "High Risk" : selectedSubmission.riskScore >= 40 ? "Medium Risk" : "Low Risk"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Based on contributor history and data quality</p>
-                  </div>
-                </div>
-              </div>
+
+
 
               {/* Internal Notes */}
               <div className="bg-card rounded-lg border card-shadow p-5">
@@ -342,17 +318,8 @@ const Submissions = () => {
           </SelectContent>
         </Select>
 
-        <Select value={riskFilter} onValueChange={setRiskFilter}>
-          <SelectTrigger className="w-36 h-9 text-sm bg-card">
-            <SelectValue placeholder="Risk Level" />
-          </SelectTrigger>
-          <SelectContent className="bg-popover">
-            <SelectItem value="all">All Risk</SelectItem>
-            <SelectItem value="high">High Risk</SelectItem>
-            <SelectItem value="medium">Medium Risk</SelectItem>
-            <SelectItem value="low">Low Risk</SelectItem>
-          </SelectContent>
-        </Select>
+
+
 
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -392,7 +359,6 @@ const Submissions = () => {
                 <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 hidden lg:table-cell">Source</th>
                 <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 hidden sm:table-cell">Date</th>
                 <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3">Status</th>
-                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 hidden md:table-cell">Risk</th>
                 <th className="w-10 px-4 py-3" />
               </tr>
             </thead>
@@ -423,11 +389,8 @@ const Submissions = () => {
                       {row.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
-                    <span className={cn("text-[11px] font-medium px-2.5 py-1 rounded-full", getRiskColor(row.riskScore))}>
-                      {row.riskScore}
-                    </span>
-                  </td>
+
+
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <button className="p-1 rounded hover:bg-muted transition-colors">
                       <Eye className="h-4 w-4 text-muted-foreground" />

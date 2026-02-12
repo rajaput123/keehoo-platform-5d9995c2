@@ -21,7 +21,7 @@ import OnboardingOverview from "./pages/onboarding/Overview";
 import RegistrationPipeline from "./pages/onboarding/RegistrationPipeline";
 import VerificationQueue from "./pages/onboarding/VerificationQueue";
 import DirectOnboarding from "./pages/onboarding/DirectOnboarding";
-import ComplianceRisk from "./pages/onboarding/ComplianceRisk";
+
 import ApprovalLogs from "./pages/onboarding/ApprovalLogs";
 import TenantLayout from "./components/TenantLayout";
 import TenantOverview from "./pages/tenant/Overview";
@@ -71,7 +71,7 @@ const App = () => {
               <Route path="registration-pipeline" element={<RegistrationPipeline />} />
               <Route path="verification-queue" element={<VerificationQueue />} />
               <Route path="direct-onboarding" element={<DirectOnboarding />} />
-              <Route path="compliance-risk" element={<ComplianceRisk />} />
+              
               <Route path="approval-logs" element={<ApprovalLogs />} />
             </Route>
 
