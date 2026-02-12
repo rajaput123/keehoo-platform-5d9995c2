@@ -366,8 +366,6 @@ const RegistrationPipeline = () => {
               <TableHead>Region</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Duplicate</TableHead>
-              <TableHead>Assigned</TableHead>
-              <TableHead>SLA</TableHead>
               <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -407,17 +405,6 @@ const RegistrationPipeline = () => {
                     <Progress value={reg.duplicateScore} className="w-16 h-1.5" />
                     <span className="text-xs text-muted-foreground">{reg.duplicateScore}%</span>
                   </div>
-                </TableCell>
-                <TableCell className="text-sm">{reg.assignedTo}</TableCell>
-                <TableCell>
-                  <span className={`text-xs font-medium ${
-                    reg.slaRemaining === "—" ? "text-muted-foreground" :
-                    reg.slaRemaining.includes("h") && !reg.slaRemaining.includes("d") 
-                      ? "text-warning" 
-                      : "text-foreground"
-                  }`}>
-                    {reg.slaRemaining}
-                  </span>
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
