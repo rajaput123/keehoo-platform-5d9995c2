@@ -51,15 +51,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import SearchableSelect from "@/components/SearchableSelect";
 import CustomFieldsSection from "@/components/CustomFieldsSection";
-
-const tenants = [
-  { id: "TEN-001", templeName: "Sri Lakshmi Narasimha Temple", directoryId: "DIR-4521", plan: "Premium", tier: "Premium", status: "Active", activation: "Full SaaS", region: "Tamil Nadu", accountManager: "Priya Sharma", healthScore: 92, createdDate: "2024-01-15", lastActivity: "2 hours ago" },
-  { id: "TEN-002", templeName: "ISKCON Mumbai", directoryId: "DIR-1234", plan: "Enterprise", tier: "Enterprise", status: "Active", activation: "Full SaaS", region: "Maharashtra", accountManager: "Rahul Verma", healthScore: 98, createdDate: "2023-06-20", lastActivity: "10 min ago" },
-  { id: "TEN-003", templeName: "Golden Temple Trust", directoryId: "DIR-0089", plan: "Government", tier: "Government", status: "Active", activation: "Full SaaS", region: "Punjab", accountManager: "Deepak Singh", healthScore: 95, createdDate: "2023-03-10", lastActivity: "1 hour ago" },
-  { id: "TEN-004", templeName: "Kashi Vishwanath", directoryId: "DIR-2345", plan: "Enterprise", tier: "Enterprise", status: "Active", activation: "Full SaaS", region: "Uttar Pradesh", accountManager: "Amit Patel", healthScore: 88, createdDate: "2023-08-15", lastActivity: "3 hours ago" },
-  { id: "TEN-005", templeName: "Local Shiva Temple", directoryId: "DIR-8877", plan: "Free", tier: "Free", status: "Trial", activation: "Directory Only", region: "Karnataka", accountManager: "Unassigned", healthScore: 65, createdDate: "2024-02-01", lastActivity: "1 day ago" },
-  { id: "TEN-006", templeName: "Problem Temple XYZ", directoryId: "DIR-5544", plan: "Standard", tier: "Standard", status: "Suspended", activation: "Booking Disabled", region: "Gujarat", accountManager: "Neha Kumar", healthScore: 32, createdDate: "2023-11-20", lastActivity: "2 weeks ago" },
-];
+import TenantSubscriptionTab from "@/components/TenantSubscriptionTab";
+import { tenants, getSubscriptionByTenantId, getPlanById } from "@/data/mockSubscriptions";
 
 const adminUsers = [
   { name: "Ramesh Kumar", email: "ramesh@temple.org", role: "Super Admin", status: "Active", lastLogin: "2 hours ago", mfa: true },
@@ -100,6 +93,13 @@ const planOptions = [
   { value: "government", label: "Government" },
 ];
 
+const tenantStatusColors: Record<string, string> = {
+  active: "bg-success/10 text-success",
+  trial: "bg-info/10 text-info",
+  suspended: "bg-destructive/10 text-destructive",
+  expired: "bg-muted text-muted-foreground",
+};
+
 const regionOptions = [
   { value: "tamil-nadu", label: "Tamil Nadu" },
   { value: "karnataka", label: "Karnataka" },
@@ -109,12 +109,7 @@ const regionOptions = [
   { value: "gujarat", label: "Gujarat" },
 ];
 
-const statusColors: Record<string, string> = {
-  Active: "bg-success/10 text-success",
-  Trial: "bg-info/10 text-info",
-  Suspended: "bg-destructive/10 text-destructive",
-  Expired: "bg-muted text-muted-foreground",
-};
+// Status colors now use tenantStatusColors defined above
 
 const healthColors = (score: number) => {
   if (score >= 80) return "text-success";
@@ -164,8 +159,8 @@ const AllTenants = () => {
                 <p className="text-sm text-muted-foreground">{selectedTenant.id} · {selectedTenant.directoryId}</p>
               </div>
             </div>
-            <span className={cn("text-xs font-medium px-2.5 py-1 rounded-full", statusColors[selectedTenant.status])}>
-              {selectedTenant.status}
+            <span className={cn("text-xs font-medium px-2.5 py-1 rounded-full capitalize", tenantStatusColors[selectedTenant.tenantStatus])}>
+              {selectedTenant.tenantStatus}
             </span>
           </div>
 
@@ -193,23 +188,28 @@ const AllTenants = () => {
             <TabsContent value="overview" className="mt-4 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  {[
-                    { label: "Tenant ID", value: selectedTenant.id },
-                    { label: "Directory Link", value: selectedTenant.directoryId },
-                    { label: "Tenant Tier", value: selectedTenant.tier },
-                    { label: "Current Plan", value: selectedTenant.plan },
-                  ].map((item, i) => (
+                  {(() => {
+                    const sub = getSubscriptionByTenantId(selectedTenant.id);
+                    const plan = sub ? getPlanById(sub.planId) : null;
+                    return [
+                      { label: "Tenant ID", value: selectedTenant.id },
+                      { label: "Directory Link", value: selectedTenant.directoryId },
+                      { label: "Registration ID", value: selectedTenant.registrationId },
+                      { label: "Current Plan", value: plan?.name || "Not Assigned" },
+                      { label: "Tenant Status", value: selectedTenant.tenantStatus },
+                    ];
+                  })().map((item, i) => (
                     <div key={i} className="flex justify-between py-2 border-b border-border/50">
                       <span className="text-sm text-muted-foreground">{item.label}</span>
-                      <span className={`text-sm font-medium ${item.label === "Directory Link" ? "text-primary" : ""}`}>{item.value}</span>
+                      <span className={`text-sm font-medium ${item.label === "Directory Link" ? "text-primary" : ""} capitalize`}>{item.value}</span>
                     </div>
                   ))}
                 </div>
                 <div className="space-y-3">
                   {[
-                    { label: "Activation Mode", value: selectedTenant.activation },
                     { label: "Region", value: selectedTenant.region },
                     { label: "Account Manager", value: selectedTenant.accountManager },
+                    { label: "Created Date", value: selectedTenant.createdDate },
                   ].map((item, i) => (
                     <div key={i} className="flex justify-between py-2 border-b border-border/50">
                       <span className="text-sm text-muted-foreground">{item.label}</span>
@@ -229,49 +229,8 @@ const AllTenants = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="subscription" className="mt-4 space-y-4">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold">Subscription Details</h4>
-                  <div className="space-y-3">
-                    {[
-                      { label: "Plan Name", value: selectedTenant.plan },
-                      { label: "Billing Cycle", value: "Monthly" },
-                      { label: "Start Date", value: selectedTenant.createdDate },
-                      { label: "Renewal Date", value: "2024-03-15" },
-                    ].map((item, i) => (
-                      <div key={i} className="flex justify-between py-2 border-b border-border/50">
-                        <span className="text-sm text-muted-foreground">{item.label}</span>
-                        <span className="text-sm font-medium">{item.value}</span>
-                      </div>
-                    ))}
-                    <div className="flex justify-between py-2 border-b border-border/50">
-                      <span className="text-sm text-muted-foreground">Payment Status</span>
-                      <Badge className="bg-success/10 text-success text-xs">Paid</Badge>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold">Contract Details</h4>
-                  <div className="space-y-3">
-                    {[
-                      { label: "Agreement Signed", value: "2024-01-10" },
-                      { label: "Contract Expiry", value: "2025-01-10" },
-                      { label: "Custom Pricing", value: "No" },
-                    ].map((item, i) => (
-                      <div key={i} className="flex justify-between py-2 border-b border-border/50">
-                        <span className="text-sm text-muted-foreground">{item.label}</span>
-                        <span className="text-sm font-medium">{item.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2 pt-4">
-                <Button size="sm" variant="outline">Upgrade Plan</Button>
-                <Button size="sm" variant="outline">Downgrade Plan</Button>
-                <Button size="sm" variant="outline">Extend Trial</Button>
-              </div>
+            <TabsContent value="subscription" className="mt-4">
+              <TenantSubscriptionTab tenant={selectedTenant} />
             </TabsContent>
 
             <TabsContent value="admins" className="mt-4">
@@ -579,13 +538,19 @@ const AllTenants = () => {
                       </div>
                     </td>
                     <td className="p-4">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{tenant.plan}</p>
-                        <p className="text-xs text-muted-foreground">{tenant.activation}</p>
-                      </div>
+                      {(() => {
+                        const sub = getSubscriptionByTenantId(tenant.id);
+                        const plan = sub ? getPlanById(sub.planId) : null;
+                        return (
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{plan?.name || "Not Assigned"}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{sub?.billingCycle || "—"}</p>
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="p-4">
-                      <span className={cn("text-xs font-medium px-2.5 py-1 rounded-full", statusColors[tenant.status])}>{tenant.status}</span>
+                      <span className={cn("text-xs font-medium px-2.5 py-1 rounded-full capitalize", tenantStatusColors[tenant.tenantStatus])}>{tenant.tenantStatus}</span>
                     </td>
                     <td className="p-4 text-sm text-foreground">{tenant.region}</td>
                     <td className="p-4">
