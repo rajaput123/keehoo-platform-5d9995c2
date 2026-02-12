@@ -240,10 +240,6 @@ const RegistrationPipeline = () => {
               Approve & Activate
             </Button>
             <Button size="sm" variant="outline" className="gap-2">
-              <Shield className="h-4 w-4" />
-              Move to Verification
-            </Button>
-            <Button size="sm" variant="outline" className="gap-2">
               <Send className="h-4 w-4" />
               Request More Info
             </Button>
@@ -801,10 +797,6 @@ const RegistrationPipeline = () => {
                         View Details
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Move to Verification
-                      </DropdownMenuItem>
                       <DropdownMenuItem>
                         <Shield className="h-4 w-4 mr-2" />
                         Approve
