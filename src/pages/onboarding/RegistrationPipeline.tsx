@@ -20,7 +20,8 @@ import {
   MapPin,
   Landmark,
   CreditCard,
-  ClipboardCheck
+  ClipboardCheck,
+  ArrowLeft
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,12 +41,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -64,7 +59,6 @@ const registrations = [
     submittedAt: "2024-01-15 09:30",
     status: "Under Review",
     duplicateScore: 85,
-    assignedTo: "Reviewer A",
     slaRemaining: "4h 30m",
     documents: 8,
     verified: 5,
@@ -88,7 +82,6 @@ const registrations = [
     submittedAt: "2024-01-15 08:45",
     status: "Verification Pending",
     duplicateScore: 23,
-    assignedTo: "Verifier B",
     slaRemaining: "1d 2h",
     documents: 10,
     verified: 10,
@@ -112,7 +105,6 @@ const registrations = [
     submittedAt: "2024-01-15 07:20",
     status: "Submitted",
     duplicateScore: 5,
-    assignedTo: "Unassigned",
     slaRemaining: "5h 45m",
     documents: 12,
     verified: 0,
@@ -136,7 +128,6 @@ const registrations = [
     submittedAt: "2024-01-14 16:30",
     status: "Under Review",
     duplicateScore: 12,
-    assignedTo: "Reviewer A",
     slaRemaining: "2h 15m",
     documents: 15,
     verified: 8,
@@ -160,7 +151,6 @@ const registrations = [
     submittedAt: "2024-01-14 14:00",
     status: "Approved",
     duplicateScore: 0,
-    assignedTo: "Approver C",
     slaRemaining: "—",
     documents: 11,
     verified: 11,
@@ -197,23 +187,14 @@ const regionOptions = [
   { value: "ap", label: "Andhra Pradesh" },
 ];
 
-const reviewerOptions = [
-  { value: "reviewer-a", label: "Reviewer A" },
-  { value: "reviewer-b", label: "Reviewer B" },
-  { value: "reviewer-c", label: "Reviewer C" },
-];
-
 const RegistrationPipeline = () => {
   const [selectedRegistration, setSelectedRegistration] = useState<typeof registrations[0] | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedReviewer, setSelectedReviewer] = useState("");
 
   const handleViewDetails = (registration: typeof registrations[0]) => {
     setSelectedRegistration(registration);
-    setDetailOpen(true);
   };
 
   const handleRowClick = (registration: typeof registrations[0]) => {
@@ -231,6 +212,404 @@ const RegistrationPipeline = () => {
       prev.length === registrations.length ? [] : registrations.map(r => r.id)
     );
   };
+
+  // Inline Detail View
+  if (selectedRegistration) {
+    return (
+      <div className="p-6 lg:px-8 lg:pt-4 lg:pb-8 max-w-7xl">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-6">
+            <Button variant="ghost" size="sm" onClick={() => setSelectedRegistration(null)} className="gap-1.5">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-foreground">{selectedRegistration.templeName}</h1>
+              <p className="text-sm text-muted-foreground">{selectedRegistration.id} · {selectedRegistration.trustName}</p>
+            </div>
+            <Badge className={statusColors[selectedRegistration.status]} variant="secondary">
+              {selectedRegistration.status}
+            </Badge>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 pb-4 mb-4 border-b">
+            <Button size="sm" className="gap-2">
+              <CheckCircle2 className="h-4 w-4" />
+              Approve & Activate
+            </Button>
+            <Button size="sm" variant="outline" className="gap-2">
+              <Shield className="h-4 w-4" />
+              Move to Verification
+            </Button>
+            <Button size="sm" variant="outline" className="gap-2">
+              <Send className="h-4 w-4" />
+              Request More Info
+            </Button>
+            <Button size="sm" variant="outline" className="gap-2 text-destructive hover:text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              Reject
+            </Button>
+          </div>
+
+          <Tabs defaultValue="temple">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="temple">Temple</TabsTrigger>
+              <TabsTrigger value="location">Location</TabsTrigger>
+              <TabsTrigger value="trust">Trust/Legal</TabsTrigger>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
+              <TabsTrigger value="bank">Bank</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+            </TabsList>
+
+            {/* Temple Details Tab */}
+            <TabsContent value="temple" className="space-y-4 mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    Temple Information
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { label: "Temple Name", value: selectedRegistration.templeName },
+                      { label: "Alternate Name", value: "—" },
+                      { label: "Temple Type", value: selectedRegistration.templeType },
+                      { label: "Established Year", value: selectedRegistration.establishedYear },
+                      { label: "Primary Deity", value: selectedRegistration.primaryDeity },
+                      { label: "Secondary Deities", value: "—" },
+                      { label: "Category", value: "—" },
+                      { label: "Registration ID", value: selectedRegistration.id },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className={item.label === "Registration ID" ? "font-mono" : "font-medium"}>{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="glass-card rounded-xl p-4 space-y-3">
+                    <h4 className="text-sm font-semibold">Short Description</h4>
+                    <p className="text-sm text-muted-foreground">
+                      A historic temple dedicated to {selectedRegistration.primaryDeity}, located in {selectedRegistration.city}.
+                    </p>
+                  </div>
+                  <div className="glass-card rounded-xl p-4 space-y-3">
+                    <h4 className="text-sm font-semibold">Temple Photos</h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="aspect-square rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                          Photo {i}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Location Tab */}
+            <TabsContent value="location" className="space-y-4 mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    Address Information
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { label: "Address Line 1", value: "123 Temple Street" },
+                      { label: "Landmark", value: "Near Main Market" },
+                      { label: "City", value: selectedRegistration.city },
+                      { label: "District", value: selectedRegistration.city },
+                      { label: "State", value: selectedRegistration.region },
+                      { label: "Country", value: "India" },
+                      { label: "Pincode", value: "600001" },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className="font-medium">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    Geo Details
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground">GPS Latitude</span>
+                      <span className="font-medium">13.0827°</span>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground">GPS Longitude</span>
+                      <span className="font-medium">80.2707°</span>
+                    </div>
+                    <div className="flex justify-between py-1.5">
+                      <span className="text-muted-foreground">Map Pin</span>
+                      <Badge variant="outline" className="text-success border-success">Verified</Badge>
+                    </div>
+                  </div>
+                  <div className="aspect-video rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground mt-2">
+                    Map Preview
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Trust/Legal Tab */}
+            <TabsContent value="trust" className="space-y-4 mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Landmark className="h-4 w-4 text-primary" />
+                    Organization Information
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { label: "Trust / Society Name", value: selectedRegistration.trustName },
+                      { label: "Legal Entity Type", value: "Public Trust" },
+                      { label: "Registration Number", value: "TR/2020/12345" },
+                      { label: "Date of Registration", value: "15-Mar-2020" },
+                      { label: "Place of Registration", value: selectedRegistration.city },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className={item.label === "Registration Number" ? "font-mono" : "font-medium"}>{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    Legal Documents
+                  </h4>
+                  <div className="space-y-2">
+                    {[
+                      { name: "Trust Registration Certificate", status: "Uploaded", required: true },
+                      { name: "Trust Deed Copy", status: "Not Uploaded", required: false },
+                      { name: "PAN of Trust", status: "Uploaded", required: true },
+                      { name: "GST Number", status: "Not Uploaded", required: false },
+                      { name: "80G Certificate", status: "Uploaded", required: false },
+                      { name: "12A Certificate", status: "Not Uploaded", required: false },
+                    ].map((doc, i) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-lg border">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{doc.name}</span>
+                          {doc.required && <Badge variant="outline" className="text-xs">Required</Badge>}
+                        </div>
+                        <Badge variant={doc.status === "Uploaded" ? "default" : "secondary"}>
+                          {doc.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Admin Details Tab */}
+            <TabsContent value="admin" className="space-y-4 mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <User className="h-4 w-4 text-primary" />
+                    Authorized Person Details
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { label: "Full Name", value: selectedRegistration.adminName },
+                      { label: "Role", value: selectedRegistration.adminRole },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between py-1.5 border-b border-border/50">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className="font-medium">{item.value}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground">Mobile Number</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{selectedRegistration.adminMobile}</span>
+                        <Badge variant="outline" className="text-xs text-success border-success">OTP Verified</Badge>
+                      </div>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground">Email</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{selectedRegistration.adminEmail}</span>
+                        <Badge variant="outline" className="text-xs text-success border-success">Verified</Badge>
+                      </div>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground">Date of Birth</span>
+                      <span className="font-medium">15-Jun-1980</span>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground">ID Proof Type</span>
+                      <span className="font-medium">Aadhar</span>
+                    </div>
+                    <div className="flex justify-between py-1.5">
+                      <span className="text-muted-foreground">ID Proof Number</span>
+                      <span className="font-mono">XXXX XXXX 1234</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="glass-card rounded-xl p-4 space-y-3">
+                    <h4 className="text-sm font-semibold">ID & Photo Uploads</h4>
+                    <div className="space-y-2">
+                      {[
+                        { name: "ID Proof Document", status: "Uploaded" },
+                        { name: "Profile Photo", status: "Uploaded" },
+                        { name: "Authorization Letter", status: "Not Required" },
+                      ].map((doc, i) => (
+                        <div key={i} className="flex items-center justify-between p-2 rounded-lg border">
+                          <span className="text-sm">{doc.name}</span>
+                          <Badge variant={doc.status === "Uploaded" ? "default" : "secondary"}>
+                            {doc.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="glass-card rounded-xl p-4 space-y-3">
+                    <h4 className="text-sm font-semibold">Authority Confirmation</h4>
+                    <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
+                      <Checkbox checked={true} disabled />
+                      <span className="text-sm">"I confirm I am legally authorized to represent this temple."</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Bank Details Tab */}
+            <TabsContent value="bank" className="space-y-4 mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-primary" />
+                    Bank Account Details
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { label: "Account Holder Name", value: selectedRegistration.trustName },
+                      { label: "Bank Name", value: selectedRegistration.bankName },
+                      { label: "Branch Name", value: `${selectedRegistration.city} Main Branch` },
+                      { label: "Account Number", value: selectedRegistration.accountNumber, mono: true },
+                      { label: "IFSC Code", value: selectedRegistration.ifscCode, mono: true },
+                      { label: "Account Type", value: "Current" },
+                      { label: "UPI ID", value: "—" },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className={item.mono ? "font-mono" : "font-medium"}>{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="glass-card rounded-xl p-4 space-y-3">
+                    <h4 className="text-sm font-semibold">Cancelled Cheque</h4>
+                    <div className="aspect-video rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                      Cancelled Cheque Image
+                    </div>
+                  </div>
+                  <div className="glass-card rounded-xl p-4 space-y-3">
+                    <h4 className="text-sm font-semibold">Payment Settings</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between py-1.5 border-b border-border/50">
+                        <span className="text-muted-foreground">Online Donations</span>
+                        <Badge variant="outline" className="text-success border-success">Enabled</Badge>
+                      </div>
+                      <div className="flex justify-between py-1.5">
+                        <span className="text-muted-foreground">Seva Payments</span>
+                        <Badge variant="outline" className="text-success border-success">Enabled</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Documents Tab */}
+            <TabsContent value="documents" className="space-y-4 mt-4">
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-semibold">All Documents ({selectedRegistration.verified}/{selectedRegistration.documents} Verified)</h4>
+                  <Button variant="outline" size="sm">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Request Document
+                  </Button>
+                </div>
+                <Progress value={(selectedRegistration.verified / selectedRegistration.documents) * 100} className="h-2 mb-4" />
+                <div className="space-y-2">
+                  {[
+                    { name: "Trust Registration Certificate", status: "Verified", required: true },
+                    { name: "PAN of Trust", status: "Verified", required: true },
+                    { name: "80G Certificate", status: "Verified", required: false },
+                    { name: "Temple Photos (3)", status: "Verified", required: true },
+                    { name: "Admin ID Proof", status: "Verified", required: true },
+                    { name: "Admin Profile Photo", status: "Pending", required: true },
+                    { name: "Cancelled Cheque", status: "Pending", required: true },
+                    { name: "Authorization Letter", status: "Pending", required: false },
+                    { name: "GST Certificate", status: "Not Uploaded", required: false },
+                    { name: "12A Certificate", status: "Not Uploaded", required: false },
+                    { name: "Trust Deed Copy", status: "Not Uploaded", required: false },
+                  ].map((doc, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{doc.name}</span>
+                        {doc.required && <Badge variant="outline" className="text-xs">Required</Badge>}
+                      </div>
+                      <Badge variant={doc.status === "Verified" ? "default" : doc.status === "Pending" ? "secondary" : "outline"}>
+                        {doc.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Governance & Consent */}
+              <div className="glass-card rounded-xl p-4 space-y-3">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <ClipboardCheck className="h-4 w-4 text-primary" />
+                  Governance & Legal Consent
+                </h4>
+                {[
+                  { label: "Accept Terms & Conditions", checked: true },
+                  { label: "Accept Platform Governance Policy", checked: true },
+                  { label: "Accept Commission Structure", checked: true },
+                  { label: "Accept Data Privacy Policy", checked: true },
+                  { label: "Confirm Documents Are Authentic", checked: true },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50">
+                    <Checkbox checked={item.checked} disabled />
+                    <span className="text-sm">{item.label}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between py-1.5 text-sm mt-2 pt-2 border-t border-border/50">
+                  <span className="text-muted-foreground">Digital Confirmation</span>
+                  <span className="font-medium">{selectedRegistration.adminName} • {selectedRegistration.submittedAt}</span>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div className="glass-card rounded-xl p-4 space-y-3">
+                <h4 className="text-sm font-semibold">Internal Notes</h4>
+                <Textarea placeholder="Add internal notes..." className="min-h-[100px]" />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 lg:px-8 lg:pt-4 lg:pb-8 max-w-7xl">
@@ -330,10 +709,6 @@ const RegistrationPipeline = () => {
           <span className="text-sm font-medium">{selectedItems.length} item(s) selected</span>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">
-              <User className="h-4 w-4 mr-2" />
-              Assign Reviewer
-            </Button>
-            <Button variant="outline" size="sm">
               <CheckCircle2 className="h-4 w-4 mr-2" />
               Bulk Approve
             </Button>
@@ -364,6 +739,7 @@ const RegistrationPipeline = () => {
               <TableHead className="w-[100px]">ID</TableHead>
               <TableHead>Temple</TableHead>
               <TableHead>Region</TableHead>
+              <TableHead>Documents</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Duplicate</TableHead>
               <TableHead className="w-[80px]">Actions</TableHead>
@@ -396,6 +772,12 @@ const RegistrationPipeline = () => {
                   </div>
                 </TableCell>
                 <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Progress value={(reg.verified / reg.documents) * 100} className="w-16 h-1.5" />
+                    <span className="text-xs text-muted-foreground">{reg.verified}/{reg.documents}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
                   <Badge className={statusColors[reg.status]} variant="secondary">
                     {reg.status}
                   </Badge>
@@ -418,10 +800,6 @@ const RegistrationPipeline = () => {
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <User className="h-4 w-4 mr-2" />
-                        Assign Reviewer
-                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>
                         <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -443,473 +821,6 @@ const RegistrationPipeline = () => {
           </TableBody>
         </Table>
       </motion.div>
-
-      {/* Detail Dialog */}
-      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Registration Review: {selectedRegistration?.templeName}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedRegistration && (
-            <>
-              {/* Actions at Top */}
-              <div className="flex items-center gap-2 pt-2 pb-4 border-b">
-                <Button size="sm" className="gap-2">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Approve & Activate
-                </Button>
-                <Button size="sm" variant="outline" className="gap-2">
-                  <Shield className="h-4 w-4" />
-                  Move to Verification
-                </Button>
-                <Button size="sm" variant="outline" className="gap-2">
-                  <Send className="h-4 w-4" />
-                  Request More Info
-                </Button>
-                <Button size="sm" variant="outline" className="gap-2 text-destructive hover:text-destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  Reject
-                </Button>
-              </div>
-
-              <Tabs defaultValue="temple" className="mt-4">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="temple">Temple</TabsTrigger>
-                  <TabsTrigger value="location">Location</TabsTrigger>
-                  <TabsTrigger value="trust">Trust/Legal</TabsTrigger>
-                  <TabsTrigger value="admin">Admin</TabsTrigger>
-                  <TabsTrigger value="bank">Bank</TabsTrigger>
-                  <TabsTrigger value="documents">Documents</TabsTrigger>
-                </TabsList>
-
-                {/* Temple Details Tab */}
-                <TabsContent value="temple" className="space-y-4 mt-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-primary" />
-                        Temple Information
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Temple Name</span>
-                          <span className="font-medium">{selectedRegistration.templeName}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Alternate Name</span>
-                          <span className="font-medium">—</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Temple Type</span>
-                          <span className="font-medium">{selectedRegistration.templeType}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Established Year</span>
-                          <span className="font-medium">{selectedRegistration.establishedYear}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Primary Deity</span>
-                          <span className="font-medium">{selectedRegistration.primaryDeity}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Secondary Deities</span>
-                          <span className="font-medium">—</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Category</span>
-                          <span className="font-medium">—</span>
-                        </div>
-                        <div className="flex justify-between py-1.5">
-                          <span className="text-muted-foreground">Registration ID</span>
-                          <span className="font-mono">{selectedRegistration.id}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="glass-card rounded-xl p-4 space-y-3">
-                        <h4 className="text-sm font-semibold">Short Description</h4>
-                        <p className="text-sm text-muted-foreground">
-                          A historic temple dedicated to {selectedRegistration.primaryDeity}, located in {selectedRegistration.city}.
-                        </p>
-                      </div>
-                      <div className="glass-card rounded-xl p-4 space-y-3">
-                        <h4 className="text-sm font-semibold">Temple Photos</h4>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[1, 2, 3].map((i) => (
-                            <div key={i} className="aspect-square rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                              Photo {i}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                {/* Location Tab */}
-                <TabsContent value="location" className="space-y-4 mt-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        Address Information
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Address Line 1</span>
-                          <span className="font-medium">123 Temple Street</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Address Line 2</span>
-                          <span className="font-medium">—</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Landmark</span>
-                          <span className="font-medium">Near Main Market</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">City</span>
-                          <span className="font-medium">{selectedRegistration.city}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">District</span>
-                          <span className="font-medium">{selectedRegistration.city}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">State</span>
-                          <span className="font-medium">{selectedRegistration.region}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Country</span>
-                          <span className="font-medium">India</span>
-                        </div>
-                        <div className="flex justify-between py-1.5">
-                          <span className="text-muted-foreground">Pincode</span>
-                          <span className="font-medium">600001</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        Geo Details
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">GPS Latitude</span>
-                          <span className="font-medium">13.0827°</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">GPS Longitude</span>
-                          <span className="font-medium">80.2707°</span>
-                        </div>
-                        <div className="flex justify-between py-1.5">
-                          <span className="text-muted-foreground">Map Pin</span>
-                          <Badge variant="outline" className="text-success border-success">Verified</Badge>
-                        </div>
-                      </div>
-                      <div className="aspect-video rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground mt-2">
-                        Map Preview
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                {/* Trust/Legal Tab */}
-                <TabsContent value="trust" className="space-y-4 mt-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <Landmark className="h-4 w-4 text-primary" />
-                        Organization Information
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Trust / Society Name</span>
-                          <span className="font-medium">{selectedRegistration.trustName}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Legal Entity Type</span>
-                          <span className="font-medium">Public Trust</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Registration Number</span>
-                          <span className="font-mono">TR/2020/12345</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Date of Registration</span>
-                          <span className="font-medium">15-Mar-2020</span>
-                        </div>
-                        <div className="flex justify-between py-1.5">
-                          <span className="text-muted-foreground">Place of Registration</span>
-                          <span className="font-medium">{selectedRegistration.city}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary" />
-                        Legal Documents
-                      </h4>
-                      <div className="space-y-2">
-                        {[
-                          { name: "Trust Registration Certificate", status: "Uploaded", required: true },
-                          { name: "Trust Deed Copy", status: "Not Uploaded", required: false },
-                          { name: "PAN of Trust", status: "Uploaded", required: true },
-                          { name: "GST Number", status: "Not Uploaded", required: false },
-                          { name: "80G Certificate", status: "Uploaded", required: false },
-                          { name: "12A Certificate", status: "Not Uploaded", required: false },
-                        ].map((doc, i) => (
-                          <div key={i} className="flex items-center justify-between p-2 rounded-lg border">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">{doc.name}</span>
-                              {doc.required && <Badge variant="outline" className="text-xs">Required</Badge>}
-                            </div>
-                            <Badge variant={doc.status === "Uploaded" ? "default" : "secondary"}>
-                              {doc.status}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                {/* Admin Details Tab */}
-                <TabsContent value="admin" className="space-y-4 mt-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <User className="h-4 w-4 text-primary" />
-                        Authorized Person Details
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Full Name</span>
-                          <span className="font-medium">{selectedRegistration.adminName}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Role</span>
-                          <span className="font-medium">{selectedRegistration.adminRole}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Mobile Number</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{selectedRegistration.adminMobile}</span>
-                            <Badge variant="outline" className="text-xs text-success border-success">OTP Verified</Badge>
-                          </div>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Email</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{selectedRegistration.adminEmail}</span>
-                            <Badge variant="outline" className="text-xs text-success border-success">Verified</Badge>
-                          </div>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Date of Birth</span>
-                          <span className="font-medium">15-Jun-1980</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">ID Proof Type</span>
-                          <span className="font-medium">Aadhar</span>
-                        </div>
-                        <div className="flex justify-between py-1.5">
-                          <span className="text-muted-foreground">ID Proof Number</span>
-                          <span className="font-mono">XXXX XXXX 1234</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="glass-card rounded-xl p-4 space-y-3">
-                        <h4 className="text-sm font-semibold">ID & Photo Uploads</h4>
-                        <div className="space-y-2">
-                          {[
-                            { name: "ID Proof Document", status: "Uploaded" },
-                            { name: "Profile Photo", status: "Uploaded" },
-                            { name: "Authorization Letter", status: "Not Required" },
-                          ].map((doc, i) => (
-                            <div key={i} className="flex items-center justify-between p-2 rounded-lg border">
-                              <span className="text-sm">{doc.name}</span>
-                              <Badge variant={doc.status === "Uploaded" ? "default" : "secondary"}>
-                                {doc.status}
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="glass-card rounded-xl p-4 space-y-3">
-                        <h4 className="text-sm font-semibold">Authority Confirmation</h4>
-                        <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
-                          <Checkbox checked={true} disabled />
-                          <span className="text-sm">"I confirm I am legally authorized to represent this temple."</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                {/* Bank Details Tab */}
-                <TabsContent value="bank" className="space-y-4 mt-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <CreditCard className="h-4 w-4 text-primary" />
-                        Bank Account Details
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Account Holder Name</span>
-                          <span className="font-medium">{selectedRegistration.trustName}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Bank Name</span>
-                          <span className="font-medium">{selectedRegistration.bankName}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Branch Name</span>
-                          <span className="font-medium">{selectedRegistration.city} Main Branch</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Account Number</span>
-                          <span className="font-mono">{selectedRegistration.accountNumber}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">IFSC Code</span>
-                          <span className="font-mono">{selectedRegistration.ifscCode}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-border/50">
-                          <span className="text-muted-foreground">Account Type</span>
-                          <span className="font-medium">Current</span>
-                        </div>
-                        <div className="flex justify-between py-1.5">
-                          <span className="text-muted-foreground">UPI ID</span>
-                          <span className="font-medium">—</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="glass-card rounded-xl p-4 space-y-3">
-                        <h4 className="text-sm font-semibold">Cancelled Cheque</h4>
-                        <div className="aspect-video rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                          Cancelled Cheque Image
-                        </div>
-                      </div>
-                      <div className="glass-card rounded-xl p-4 space-y-3">
-                        <h4 className="text-sm font-semibold">Payment Settings</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between py-1.5 border-b border-border/50">
-                            <span className="text-muted-foreground">Online Donations</span>
-                            <Badge variant="outline" className="text-success border-success">Enabled</Badge>
-                          </div>
-                          <div className="flex justify-between py-1.5">
-                            <span className="text-muted-foreground">Seva Payments</span>
-                            <Badge variant="outline" className="text-success border-success">Enabled</Badge>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                {/* Documents Tab */}
-                <TabsContent value="documents" className="space-y-4 mt-4">
-                  <div className="glass-card rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-sm font-semibold">All Documents ({selectedRegistration.verified}/{selectedRegistration.documents} Verified)</h4>
-                      <Button variant="outline" size="sm">
-                        <Upload className="h-4 w-4 mr-2" />
-                        Request Document
-                      </Button>
-                    </div>
-                    <Progress value={(selectedRegistration.verified / selectedRegistration.documents) * 100} className="h-2 mb-4" />
-                    <div className="space-y-2">
-                      {[
-                        { name: "Trust Registration Certificate", status: "Verified", required: true },
-                        { name: "PAN of Trust", status: "Verified", required: true },
-                        { name: "80G Certificate", status: "Verified", required: false },
-                        { name: "Temple Photos (3)", status: "Verified", required: true },
-                        { name: "Admin ID Proof", status: "Verified", required: true },
-                        { name: "Admin Profile Photo", status: "Pending", required: true },
-                        { name: "Cancelled Cheque", status: "Pending", required: true },
-                        { name: "Authorization Letter", status: "Pending", required: false },
-                        { name: "GST Certificate", status: "Not Uploaded", required: false },
-                        { name: "12A Certificate", status: "Not Uploaded", required: false },
-                        { name: "Trust Deed Copy", status: "Not Uploaded", required: false },
-                      ].map((doc, i) => (
-                        <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm">{doc.name}</span>
-                            {doc.required && <Badge variant="outline" className="text-xs">Required</Badge>}
-                          </div>
-                          <Badge variant={doc.status === "Verified" ? "default" : doc.status === "Pending" ? "secondary" : "outline"}>
-                            {doc.status}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Governance & Consent */}
-                  <div className="glass-card rounded-xl p-4 space-y-3">
-                    <h4 className="text-sm font-semibold flex items-center gap-2">
-                      <ClipboardCheck className="h-4 w-4 text-primary" />
-                      Governance & Legal Consent
-                    </h4>
-                    {[
-                      { label: "Accept Terms & Conditions", checked: true },
-                      { label: "Accept Platform Governance Policy", checked: true },
-                      { label: "Accept Commission Structure", checked: true },
-                      { label: "Accept Data Privacy Policy", checked: true },
-                      { label: "Confirm Documents Are Authentic", checked: true },
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50">
-                        <Checkbox checked={item.checked} disabled />
-                        <span className="text-sm">{item.label}</span>
-                      </div>
-                    ))}
-                    <div className="flex justify-between py-1.5 text-sm mt-2 pt-2 border-t border-border/50">
-                      <span className="text-muted-foreground">Digital Confirmation</span>
-                      <span className="font-medium">{selectedRegistration.adminName} • {selectedRegistration.submittedAt}</span>
-                    </div>
-                  </div>
-
-                  {/* Assignment & Notes */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold">Assignment</h4>
-                      <div className="space-y-2">
-                        <Label>Assign Reviewer</Label>
-                        <SearchableSelect
-                          options={reviewerOptions}
-                          value={selectedReviewer}
-                          onValueChange={setSelectedReviewer}
-                          placeholder="Select reviewer"
-                          onAddNew={() => alert("Add new reviewer")}
-                          addNewLabel="Add Reviewer"
-                        />
-                      </div>
-                    </div>
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold">Internal Notes</h4>
-                      <Textarea placeholder="Add internal notes..." className="min-h-[100px]" />
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

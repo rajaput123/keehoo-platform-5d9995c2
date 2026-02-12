@@ -20,7 +20,8 @@ import {
   CreditCard,
   ClipboardCheck,
   UserCheck,
-  FileText
+  FileText,
+  ArrowLeft
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchableSelect from "@/components/SearchableSelect";
 
 const steps = [
@@ -67,32 +69,59 @@ const recentOnboardings = [
   { 
     id: "ONB-2001", 
     templeName: "Sri Padmanabhaswamy Temple", 
-    
     region: "Kerala",
+    city: "Thiruvananthapuram",
     status: "Activated",
     createdBy: "Admin A",
     createdAt: "2024-01-15 14:30",
-    completedSteps: 7
+    completedSteps: 7,
+    templeType: "Government Managed",
+    primaryDeity: "Vishnu",
+    trustName: "Travancore Devaswom Board",
+    adminName: "Rajesh Nair",
+    adminEmail: "rajesh@tdb.org",
+    adminMobile: "+91 9876543210",
+    bankName: "State Bank of India",
+    accountNumber: "XXXX4567",
+    ifscCode: "SBIN0004567",
   },
   { 
     id: "ONB-2000", 
     templeName: "Meenakshi Amman Temple", 
-    
     region: "Tamil Nadu",
+    city: "Madurai",
     status: "Pending Activation",
     createdBy: "Admin B",
     createdAt: "2024-01-15 11:20",
-    completedSteps: 5
+    completedSteps: 5,
+    templeType: "Public",
+    primaryDeity: "Meenakshi",
+    trustName: "HR&CE Department",
+    adminName: "Sundar Rajan",
+    adminEmail: "sundar@hrce.org",
+    adminMobile: "+91 9876543211",
+    bankName: "Indian Bank",
+    accountNumber: "XXXX8901",
+    ifscCode: "IDIB0008901",
   },
   { 
     id: "ONB-1999", 
     templeName: "Jagannath Temple", 
-    
     region: "Odisha",
+    city: "Puri",
     status: "In Progress",
     createdBy: "Admin A",
     createdAt: "2024-01-15 09:45",
-    completedSteps: 3
+    completedSteps: 3,
+    templeType: "Government Managed",
+    primaryDeity: "Jagannath",
+    trustName: "Shree Jagannath Temple Administration",
+    adminName: "Biswajit Mohapatra",
+    adminEmail: "biswajit@sjta.org",
+    adminMobile: "+91 9876543212",
+    bankName: "UCO Bank",
+    accountNumber: "XXXX2345",
+    ifscCode: "UCBA0002345",
   },
 ];
 
@@ -150,10 +179,25 @@ const accountTypeOptions = [
   { value: "current", label: "Current" },
 ];
 
+const dummyDocuments = [
+  { name: "Trust Registration Certificate", status: "Uploaded", required: true },
+  { name: "PAN of Trust", status: "Uploaded", required: true },
+  { name: "Temple Photos (3)", status: "Uploaded", required: true },
+  { name: "Admin ID Proof (Aadhar)", status: "Uploaded", required: true },
+  { name: "Admin Profile Photo", status: "Uploaded", required: true },
+  { name: "Cancelled Cheque", status: "Uploaded", required: true },
+  { name: "80G Certificate", status: "Pending", required: false },
+  { name: "12A Certificate", status: "Not Uploaded", required: false },
+  { name: "GST Certificate", status: "Not Uploaded", required: false },
+  { name: "Trust Deed Copy", status: "Not Uploaded", required: false },
+  { name: "Authorization Letter", status: "Not Required", required: false },
+];
+
 const DirectOnboarding = () => {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedOnboarding, setSelectedOnboarding] = useState<typeof recentOnboardings[0] | null>(null);
 
   const totalSteps = steps.length;
 
@@ -176,6 +220,233 @@ const DirectOnboarding = () => {
       prev.length === recentOnboardings.length ? [] : recentOnboardings.map(r => r.id)
     );
   };
+
+  // Inline Detail View
+  if (selectedOnboarding) {
+    return (
+      <div className="p-6 lg:px-8 lg:pt-4 lg:pb-8 max-w-7xl">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-6">
+            <Button variant="ghost" size="sm" onClick={() => setSelectedOnboarding(null)} className="gap-1.5">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-foreground">{selectedOnboarding.templeName}</h1>
+              <p className="text-sm text-muted-foreground">{selectedOnboarding.id} · Created by {selectedOnboarding.createdBy}</p>
+            </div>
+            <Badge className={statusColors[selectedOnboarding.status]} variant="secondary">
+              {selectedOnboarding.status}
+            </Badge>
+          </div>
+
+          {/* Progress */}
+          <div className="glass-card rounded-xl p-4 mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold">Onboarding Progress</h3>
+              <span className="text-sm text-muted-foreground">{selectedOnboarding.completedSteps}/7 steps completed</span>
+            </div>
+            <Progress value={(selectedOnboarding.completedSteps / 7) * 100} className="h-2 mb-4" />
+            <div className="flex items-center justify-between">
+              {steps.map((step) => (
+                <div key={step.id} className="flex flex-col items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
+                    selectedOnboarding.completedSteps >= step.id 
+                      ? "bg-primary border-primary text-primary-foreground" 
+                      : "border-muted-foreground/30 text-muted-foreground"
+                  }`}>
+                    {selectedOnboarding.completedSteps >= step.id ? (
+                      <Check className="h-3.5 w-3.5" />
+                    ) : (
+                      <step.icon className="h-3.5 w-3.5" />
+                    )}
+                  </div>
+                  <span className="text-[10px] mt-1 text-muted-foreground">{step.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 mb-6">
+            {selectedOnboarding.status === "Pending Activation" && (
+              <Button size="sm" className="gap-2">
+                <Rocket className="h-4 w-4" />
+                Activate
+              </Button>
+            )}
+            {selectedOnboarding.status === "In Progress" && (
+              <Button size="sm" className="gap-2">
+                <ChevronRight className="h-4 w-4" />
+                Continue Onboarding
+              </Button>
+            )}
+            <Button size="sm" variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export Details
+            </Button>
+          </div>
+
+          <Tabs defaultValue="overview">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="temple">Temple Info</TabsTrigger>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
+              <TabsTrigger value="bank">Bank</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-4 mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    Quick Summary
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { label: "Onboarding ID", value: selectedOnboarding.id },
+                      { label: "Temple Name", value: selectedOnboarding.templeName },
+                      { label: "Region", value: selectedOnboarding.region },
+                      { label: "City", value: selectedOnboarding.city },
+                      { label: "Status", value: selectedOnboarding.status },
+                      { label: "Created By", value: selectedOnboarding.createdBy },
+                      { label: "Created At", value: selectedOnboarding.createdAt },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className="font-medium">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    Document Summary
+                  </h4>
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div className="p-3 bg-success/10 rounded-lg">
+                      <p className="text-xl font-bold text-success">{dummyDocuments.filter(d => d.status === "Uploaded").length}</p>
+                      <p className="text-xs text-muted-foreground">Uploaded</p>
+                    </div>
+                    <div className="p-3 bg-warning/10 rounded-lg">
+                      <p className="text-xl font-bold text-warning">{dummyDocuments.filter(d => d.status === "Pending").length}</p>
+                      <p className="text-xs text-muted-foreground">Pending</p>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-xl font-bold text-muted-foreground">{dummyDocuments.filter(d => d.status === "Not Uploaded").length}</p>
+                      <p className="text-xs text-muted-foreground">Missing</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="temple" className="space-y-4 mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold">Temple Details</h4>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { label: "Temple Name", value: selectedOnboarding.templeName },
+                      { label: "Temple Type", value: selectedOnboarding.templeType },
+                      { label: "Primary Deity", value: selectedOnboarding.primaryDeity },
+                      { label: "Trust Name", value: selectedOnboarding.trustName },
+                      { label: "City", value: selectedOnboarding.city },
+                      { label: "Region", value: selectedOnboarding.region },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className="font-medium">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold">Temple Photos</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="aspect-square rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                        Photo {i}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="admin" className="space-y-4 mt-4">
+              <div className="glass-card rounded-xl p-4 space-y-3">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <UserCheck className="h-4 w-4 text-primary" />
+                  Admin Details
+                </h4>
+                <div className="space-y-2 text-sm">
+                  {[
+                    { label: "Admin Name", value: selectedOnboarding.adminName },
+                    { label: "Email", value: selectedOnboarding.adminEmail },
+                    { label: "Mobile", value: selectedOnboarding.adminMobile },
+                  ].map((item, i) => (
+                    <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                      <span className="text-muted-foreground">{item.label}</span>
+                      <span className="font-medium">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="bank" className="space-y-4 mt-4">
+              <div className="glass-card rounded-xl p-4 space-y-3">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-primary" />
+                  Bank Details
+                </h4>
+                <div className="space-y-2 text-sm">
+                  {[
+                    { label: "Bank Name", value: selectedOnboarding.bankName },
+                    { label: "Account Number", value: selectedOnboarding.accountNumber },
+                    { label: "IFSC Code", value: selectedOnboarding.ifscCode },
+                  ].map((item, i) => (
+                    <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                      <span className="text-muted-foreground">{item.label}</span>
+                      <span className="font-mono">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="documents" className="space-y-4 mt-4">
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-semibold">All Documents</h4>
+                  <span className="text-xs text-muted-foreground">{dummyDocuments.filter(d => d.status === "Uploaded").length}/{dummyDocuments.length} uploaded</span>
+                </div>
+                <Progress value={(dummyDocuments.filter(d => d.status === "Uploaded").length / dummyDocuments.length) * 100} className="h-2 mb-4" />
+                <div className="space-y-2">
+                  {dummyDocuments.map((doc, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{doc.name}</span>
+                        {doc.required && <Badge variant="outline" className="text-xs">Required</Badge>}
+                      </div>
+                      <Badge variant={doc.status === "Uploaded" ? "default" : doc.status === "Pending" ? "secondary" : "outline"}>
+                        {doc.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 lg:px-8 lg:pt-4 lg:pb-8 max-w-7xl">
@@ -248,194 +519,91 @@ const DirectOnboarding = () => {
 
               {/* Step Content */}
               <div className="space-y-6">
-                {/* STEP 1: Role Selection */}
                 {currentStep === 1 && (
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold">Select Registration Type</h3>
-                    {[
-                      { value: "institution", label: "Register as Temple / Trust (Institution)", desc: "Register a temple, trust, or religious institution on the platform" },
-                    ].map((role) => (
-                      <label key={role.value} className="flex items-start gap-3 p-4 rounded-xl border-2 border-primary cursor-pointer bg-primary/5">
-                        <input type="radio" name="role" value={role.value} defaultChecked className="mt-1" />
-                        <div>
-                          <p className="text-sm font-medium">{role.label}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{role.desc}</p>
-                        </div>
-                      </label>
-                    ))}
+                    <label className="flex items-start gap-3 p-4 rounded-xl border-2 border-primary cursor-pointer bg-primary/5">
+                      <input type="radio" name="role" value="institution" defaultChecked className="mt-1" />
+                      <div>
+                        <p className="text-sm font-medium">Register as Temple / Trust (Institution)</p>
+                        <p className="text-xs text-muted-foreground mt-1">Register a temple, trust, or religious institution on the platform</p>
+                      </div>
+                    </label>
                   </div>
                 )}
 
-                {/* STEP 2: Temple Basic Details */}
                 {currentStep === 2 && (
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold">Temple Information</h3>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Temple Name *</Label>
-                        <Input placeholder="Enter temple name" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Temple Alternate Name</Label>
-                        <Input placeholder="Enter alternate name" />
-                      </div>
+                      <div className="space-y-2"><Label>Temple Name *</Label><Input placeholder="Enter temple name" /></div>
+                      <div className="space-y-2"><Label>Temple Alternate Name</Label><Input placeholder="Enter alternate name" /></div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Temple Type *</Label>
-                        <SearchableSelect
-                          options={templeTypeOptions}
-                          placeholder="Select type"
-                          onValueChange={() => {}}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Established Year</Label>
-                        <Input placeholder="e.g. 1850" />
-                      </div>
+                      <div className="space-y-2"><Label>Temple Type *</Label><SearchableSelect options={templeTypeOptions} placeholder="Select type" onValueChange={() => {}} /></div>
+                      <div className="space-y-2"><Label>Established Year</Label><Input placeholder="e.g. 1850" /></div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Primary Deity *</Label>
-                        <Input placeholder="Enter primary deity" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Secondary Deities</Label>
-                        <Input placeholder="Comma-separated names" />
-                      </div>
+                      <div className="space-y-2"><Label>Primary Deity *</Label><Input placeholder="Enter primary deity" /></div>
+                      <div className="space-y-2"><Label>Secondary Deities</Label><Input placeholder="Comma-separated names" /></div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Temple Category</Label>
-                      <Input placeholder="e.g. Shiva Temple, Vishnu Temple" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Short Description *</Label>
-                      <Textarea placeholder="Brief description of the temple..." className="min-h-[80px]" />
-                    </div>
+                    <div className="space-y-2"><Label>Short Description *</Label><Textarea placeholder="Brief description..." className="min-h-[80px]" /></div>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Temple Photos (Minimum 3) *</Label>
                         <div className="border-2 border-dashed rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
-                          <Upload className="h-5 w-5 mx-auto mb-1" />
-                          Click to upload photos
+                          <Upload className="h-5 w-5 mx-auto mb-1" />Click to upload photos
                         </div>
                       </div>
                       <div className="space-y-2">
                         <Label>Temple Logo (Optional)</Label>
                         <div className="border-2 border-dashed rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
-                          <Upload className="h-5 w-5 mx-auto mb-1" />
-                          Click to upload logo
+                          <Upload className="h-5 w-5 mx-auto mb-1" />Click to upload logo
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* STEP 3: Location Details */}
                 {currentStep === 3 && (
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold">Address Information</h3>
-                    <div className="space-y-2">
-                      <Label>Address Line 1 *</Label>
-                      <Input placeholder="Street address" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Address Line 2</Label>
-                      <Input placeholder="Additional address info" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Landmark</Label>
-                      <Input placeholder="Near landmark" />
-                    </div>
+                    <div className="space-y-2"><Label>Address Line 1 *</Label><Input placeholder="Street address" /></div>
+                    <div className="space-y-2"><Label>Address Line 2</Label><Input placeholder="Additional address" /></div>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>City *</Label>
-                        <Input placeholder="City" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>District *</Label>
-                        <Input placeholder="District" />
-                      </div>
+                      <div className="space-y-2"><Label>City *</Label><Input placeholder="City" /></div>
+                      <div className="space-y-2"><Label>District *</Label><Input placeholder="District" /></div>
                     </div>
                     <div className="grid md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label>State *</Label>
-                        <SearchableSelect
-                          options={stateOptions}
-                          placeholder="Select state"
-                          onValueChange={() => {}}
-                          onAddNew={() => alert("Add new state")}
-                          addNewLabel="Add State"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Country *</Label>
-                        <SearchableSelect
-                          options={countryOptions}
-                          placeholder="Select country"
-                          onValueChange={() => {}}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Pincode *</Label>
-                        <Input placeholder="Pincode" />
-                      </div>
+                      <div className="space-y-2"><Label>State *</Label><SearchableSelect options={stateOptions} placeholder="Select state" onValueChange={() => {}} onAddNew={() => alert("Add new state")} addNewLabel="Add State" /></div>
+                      <div className="space-y-2"><Label>Country *</Label><SearchableSelect options={countryOptions} placeholder="Select country" onValueChange={() => {}} /></div>
+                      <div className="space-y-2"><Label>Pincode *</Label><Input placeholder="Pincode" /></div>
                     </div>
-
                     <h3 className="text-sm font-semibold pt-2">Geo Details</h3>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>GPS Latitude</Label>
-                        <Input placeholder="e.g. 13.0827" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>GPS Longitude</Label>
-                        <Input placeholder="e.g. 80.2707" />
-                      </div>
+                      <div className="space-y-2"><Label>GPS Latitude</Label><Input placeholder="e.g. 13.0827" /></div>
+                      <div className="space-y-2"><Label>GPS Longitude</Label><Input placeholder="e.g. 80.2707" /></div>
                     </div>
                     <div className="space-y-2">
                       <Label>Map Pin Selection *</Label>
                       <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
-                        <MapPin className="h-6 w-6 mx-auto mb-2" />
-                        Click to select location on map
+                        <MapPin className="h-6 w-6 mx-auto mb-2" />Click to select location on map
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* STEP 4: Trust / Legal Details */}
                 {currentStep === 4 && (
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold">Organization Information</h3>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Trust / Society Name *</Label>
-                        <Input placeholder="Enter trust name" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Legal Entity Type</Label>
-                        <SearchableSelect
-                          options={legalEntityOptions}
-                          placeholder="Select type"
-                          onValueChange={() => {}}
-                        />
-                      </div>
+                      <div className="space-y-2"><Label>Trust / Society Name *</Label><Input placeholder="Enter trust name" /></div>
+                      <div className="space-y-2"><Label>Legal Entity Type</Label><SearchableSelect options={legalEntityOptions} placeholder="Select type" onValueChange={() => {}} /></div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Trust Registration Number *</Label>
-                        <Input placeholder="e.g. TR/2020/12345" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Date of Registration</Label>
-                        <Input type="date" />
-                      </div>
+                      <div className="space-y-2"><Label>Trust Registration Number *</Label><Input placeholder="e.g. TR/2020/12345" /></div>
+                      <div className="space-y-2"><Label>Date of Registration</Label><Input type="date" /></div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Place of Registration</Label>
-                      <Input placeholder="City / district of registration" />
-                    </div>
-
                     <h3 className="text-sm font-semibold pt-2">Document Uploads</h3>
                     <div className="space-y-3">
                       {[
@@ -451,224 +619,103 @@ const DirectOnboarding = () => {
                             <FileText className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm">{doc.label}</span>
                           </div>
-                          <Button variant="outline" size="sm">
-                            <Upload className="h-3 w-3 mr-1" />
-                            Upload
-                          </Button>
+                          <Button variant="outline" size="sm"><Upload className="h-3 w-3 mr-1" />Upload</Button>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* STEP 5: Admin (Authorized Person) */}
                 {currentStep === 5 && (
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold">Personal Details</h3>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Full Name *</Label>
-                        <Input placeholder="Enter full name" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Role *</Label>
-                        <SearchableSelect
-                          options={adminRoleOptions}
-                          placeholder="Select role"
-                          onValueChange={() => {}}
-                        />
-                      </div>
+                      <div className="space-y-2"><Label>Full Name *</Label><Input placeholder="Enter full name" /></div>
+                      <div className="space-y-2"><Label>Role *</Label><SearchableSelect options={adminRoleOptions} placeholder="Select role" onValueChange={() => {}} /></div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Mobile Number * (OTP Verification)</Label>
-                        <Input placeholder="+91 XXXXXXXXXX" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Email Address * (OTP Verification)</Label>
-                        <Input type="email" placeholder="admin@temple.com" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Date of Birth</Label>
-                      <Input type="date" />
+                      <div className="space-y-2"><Label>Mobile Number *</Label><Input placeholder="+91 XXXXXXXXXX" /></div>
+                      <div className="space-y-2"><Label>Email Address *</Label><Input type="email" placeholder="admin@temple.com" /></div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>ID Proof Type *</Label>
-                        <SearchableSelect
-                          options={idProofOptions}
-                          placeholder="Select ID type"
-                          onValueChange={() => {}}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>ID Proof Number *</Label>
-                        <Input placeholder="Enter ID number" />
-                      </div>
+                      <div className="space-y-2"><Label>ID Proof Type *</Label><SearchableSelect options={idProofOptions} placeholder="Select ID type" onValueChange={() => {}} /></div>
+                      <div className="space-y-2"><Label>ID Proof Number *</Label><Input placeholder="Enter ID number" /></div>
                     </div>
-
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Upload ID Proof *</Label>
                         <div className="border-2 border-dashed rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
-                          <Upload className="h-5 w-5 mx-auto mb-1" />
-                          Upload ID document
+                          <Upload className="h-5 w-5 mx-auto mb-1" />Upload ID document
                         </div>
                       </div>
                       <div className="space-y-2">
                         <Label>Profile Photo *</Label>
                         <div className="border-2 border-dashed rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
-                          <Upload className="h-5 w-5 mx-auto mb-1" />
-                          Upload photo
+                          <Upload className="h-5 w-5 mx-auto mb-1" />Upload photo
                         </div>
                       </div>
                     </div>
-
-                    <h3 className="text-sm font-semibold pt-2">Authority Confirmation</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 rounded-lg border">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">Authorization Letter (if not main trustee)</span>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          <Upload className="h-3 w-3 mr-1" />
-                          Upload
-                        </Button>
-                      </div>
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                        <Checkbox id="authConfirm" />
-                        <label htmlFor="authConfirm" className="text-sm">
-                          "I confirm I am legally authorized to represent this temple."
-                        </label>
-                      </div>
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                      <Checkbox id="authConfirm" />
+                      <label htmlFor="authConfirm" className="text-sm">"I confirm I am legally authorized to represent this temple."</label>
                     </div>
                   </div>
                 )}
 
-                {/* STEP 6: Bank & Payment Details */}
                 {currentStep === 6 && (
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold">Bank Account Details</h3>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Account Holder Name *</Label>
-                        <Input placeholder="Enter account holder name" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Bank Name *</Label>
-                        <Input placeholder="Enter bank name" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Branch Name</Label>
-                      <Input placeholder="Enter branch name" />
+                      <div className="space-y-2"><Label>Account Holder Name *</Label><Input placeholder="Enter account holder name" /></div>
+                      <div className="space-y-2"><Label>Bank Name *</Label><Input placeholder="Enter bank name" /></div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Account Number *</Label>
-                        <Input placeholder="Enter account number" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>IFSC Code *</Label>
-                        <Input placeholder="e.g. SBIN0001234" />
-                      </div>
+                      <div className="space-y-2"><Label>Account Number *</Label><Input placeholder="Enter account number" /></div>
+                      <div className="space-y-2"><Label>IFSC Code *</Label><Input placeholder="e.g. SBIN0001234" /></div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Account Type</Label>
-                        <SearchableSelect
-                          options={accountTypeOptions}
-                          placeholder="Select type"
-                          onValueChange={() => {}}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>UPI ID (Optional)</Label>
-                        <Input placeholder="e.g. temple@upi" />
-                      </div>
+                      <div className="space-y-2"><Label>Account Type</Label><SearchableSelect options={accountTypeOptions} placeholder="Select type" onValueChange={() => {}} /></div>
+                      <div className="space-y-2"><Label>UPI ID (Optional)</Label><Input placeholder="e.g. temple@upi" /></div>
                     </div>
                     <div className="space-y-2">
                       <Label>Upload Cancelled Cheque *</Label>
                       <div className="border-2 border-dashed rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
-                        <Upload className="h-5 w-5 mx-auto mb-1" />
-                        Upload cancelled cheque image
+                        <Upload className="h-5 w-5 mx-auto mb-1" />Upload cancelled cheque image
                       </div>
                     </div>
-
                     <h3 className="text-sm font-semibold pt-2">Payment Settings</h3>
                     <div className="glass-card rounded-xl p-4 space-y-3">
                       <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                        <div>
-                          <p className="text-sm font-medium">Enable Online Donations?</p>
-                        </div>
+                        <p className="text-sm font-medium">Enable Online Donations?</p>
                         <Switch />
                       </div>
                       <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                        <div>
-                          <p className="text-sm font-medium">Enable Seva Payments?</p>
-                        </div>
+                        <p className="text-sm font-medium">Enable Seva Payments?</p>
                         <Switch />
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* STEP 7: Review & Submit */}
                 {currentStep === 7 && (
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold">Governance & Legal Consent</h3>
                     <div className="glass-card rounded-xl p-4 space-y-3">
-                      {[
-                        "Accept Terms & Conditions *",
-                        "Accept Platform Governance Policy *",
-                        "Accept Commission Structure *",
-                        "Accept Data Privacy Policy *",
-                        "Confirm Documents Are Authentic *",
-                      ].map((item) => (
+                      {["Accept Terms & Conditions *","Accept Platform Governance Policy *","Accept Commission Structure *","Accept Data Privacy Policy *","Confirm Documents Are Authentic *"].map((item) => (
                         <div key={item} className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50">
                           <Checkbox />
                           <span className="text-sm">{item}</span>
                         </div>
                       ))}
                     </div>
-
-                    <h3 className="text-sm font-semibold pt-2">Onboarding Summary</h3>
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        {[
-                          { label: "Role Selection", step: 1 },
-                          { label: "Temple Details", step: 2 },
-                          { label: "Location Details", step: 3 },
-                          { label: "Trust / Legal", step: 4 },
-                          { label: "Admin Details", step: 5 },
-                          { label: "Bank Details", step: 6 },
-                        ].map((item) => (
-                          <div key={item.label} className="flex justify-between">
-                            <span className="text-muted-foreground">{item.label}</span>
-                            <Badge variant="outline" className="text-success border-success">Complete</Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="glass-card rounded-xl p-4 space-y-3">
-                      <h4 className="text-sm font-semibold">Verification & Activation</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                          <span className="text-sm">Legal Documents Verified</span>
+                    <h3 className="text-sm font-semibold pt-2">Verification & Activation</h3>
+                    <div className="glass-card rounded-xl p-4 space-y-2">
+                      {["Legal Documents Verified","Bank Details Verified","KYC Completed"].map((item) => (
+                        <div key={item} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                          <span className="text-sm">{item}</span>
                           <Switch />
                         </div>
-                        <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                          <span className="text-sm">Bank Details Verified</span>
-                          <Switch />
-                        </div>
-                        <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                          <span className="text-sm">KYC Completed</span>
-                          <Switch />
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -676,23 +723,14 @@ const DirectOnboarding = () => {
 
               {/* Navigation */}
               <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                <Button 
-                  variant="outline" 
-                  onClick={handlePrevStep}
-                  disabled={currentStep === 1}
-                >
-                  <ChevronLeft className="h-4 w-4 mr-2" />
-                  Previous
+                <Button variant="outline" onClick={handlePrevStep} disabled={currentStep === 1}>
+                  <ChevronLeft className="h-4 w-4 mr-2" />Previous
                 </Button>
                 {currentStep < totalSteps ? (
-                  <Button onClick={handleNextStep}>
-                    Next
-                    <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  <Button onClick={handleNextStep}>Next<ChevronRight className="h-4 w-4 ml-2" /></Button>
                 ) : (
                   <Button onClick={() => { setWizardOpen(false); setCurrentStep(1); }}>
-                    <Rocket className="h-4 w-4 mr-2" />
-                    Submit & Activate
+                    <Rocket className="h-4 w-4 mr-2" />Submit & Activate
                   </Button>
                 )}
               </div>
@@ -738,14 +776,8 @@ const DirectOnboarding = () => {
         >
           <span className="text-sm font-medium">{selectedItems.length} item(s) selected</span>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <Rocket className="h-4 w-4 mr-2" />
-              Activate Selected
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export Selected
-            </Button>
+            <Button variant="outline" size="sm"><Rocket className="h-4 w-4 mr-2" />Activate Selected</Button>
+            <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" />Export Selected</Button>
           </div>
         </motion.div>
       )}
@@ -772,7 +804,6 @@ const DirectOnboarding = () => {
               </TableHead>
               <TableHead className="w-[100px]">ID</TableHead>
               <TableHead>Temple</TableHead>
-              
               <TableHead>Region</TableHead>
               <TableHead>Progress</TableHead>
               <TableHead>Status</TableHead>
@@ -782,7 +813,11 @@ const DirectOnboarding = () => {
           </TableHeader>
           <TableBody>
             {recentOnboardings.map((item) => (
-              <TableRow key={item.id} className="cursor-pointer hover:bg-muted/50">
+              <TableRow 
+                key={item.id} 
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => setSelectedOnboarding(item)}
+              >
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <Checkbox 
                     checked={selectedItems.includes(item.id)}
@@ -791,7 +826,6 @@ const DirectOnboarding = () => {
                 </TableCell>
                 <TableCell className="font-mono text-xs">{item.id}</TableCell>
                 <TableCell className="font-medium">{item.templeName}</TableCell>
-                
                 <TableCell className="text-sm">{item.region}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -805,7 +839,7 @@ const DirectOnboarding = () => {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{item.createdBy}</TableCell>
-                <TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -813,7 +847,7 @@ const DirectOnboarding = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-popover">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSelectedOnboarding(item)}>
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
                       </DropdownMenuItem>
