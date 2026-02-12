@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Plus, Search } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +9,6 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -45,7 +44,7 @@ const SearchableSelect = ({
 }: SearchableSelectProps) => {
   const [open, setOpen] = useState(false);
 
-  const selectedOption = options.find((opt) => opt.value === value);
+  const selectedLabel = options.find((o) => o.value === value)?.label;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -56,11 +55,11 @@ const SearchableSelect = ({
           aria-expanded={open}
           className={cn("w-full justify-between font-normal", className)}
         >
-          {selectedOption ? selectedOption.label : placeholder}
+          {selectedLabel || placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full min-w-[200px] p-0 bg-popover" align="start">
+      <PopoverContent className="w-full p-0 bg-popover" align="start">
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
@@ -86,21 +85,12 @@ const SearchableSelect = ({
               ))}
             </CommandGroup>
             {onAddNew && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => {
-                      onAddNew();
-                      setOpen(false);
-                    }}
-                    className="text-primary"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    {addNewLabel}
-                  </CommandItem>
-                </CommandGroup>
-              </>
+              <CommandGroup>
+                <CommandItem onSelect={() => { onAddNew(); setOpen(false); }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {addNewLabel}
+                </CommandItem>
+              </CommandGroup>
             )}
           </CommandList>
         </Command>
