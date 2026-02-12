@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Plus, Pencil, MapPin, MoreHorizontal, ExternalLink, GitMerge, Archive, Flag, Link2, Users, Download, Upload, ChevronDown } from "lucide-react";
+import { Search, Plus, Pencil, MapPin, MoreHorizontal, ExternalLink, GitMerge, Archive, Flag, Link2, Users, Download, Upload, ChevronDown, ArrowLeft, Building2, Globe, FileText, CreditCard, Image } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +27,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import CustomFieldsSection, { CustomField } from "@/components/CustomFieldsSection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 interface Temple {
   id: string;
@@ -61,14 +62,16 @@ const statusColors: Record<string, string> = {
   Hidden: "bg-muted text-muted-foreground",
 };
 
+const categories = [...new Set(mockData.map((t) => t.category))];
+
 const Temples = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [tenantFilter, setTenantFilter] = useState<string>("all");
-  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [showAddTemple, setShowAddTemple] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
-  const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [selectedTemple, setSelectedTemple] = useState<Temple | null>(null);
 
   const filtered = mockData
     .filter((t) => statusFilter === "all" || t.status === statusFilter)
@@ -79,7 +82,441 @@ const Temples = () => {
       return t.linkedTenant === null;
     });
 
-  const categories = [...new Set(mockData.map((t) => t.category))];
+  // Temple Detail Inline View
+  if (selectedTemple) {
+    return (
+      <div className="p-6 lg:px-8 lg:pt-4 lg:pb-8 max-w-7xl">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
+          <div className="flex items-center gap-4 mb-6">
+            <Button variant="ghost" size="sm" onClick={() => setSelectedTemple(null)} className="gap-1.5">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-foreground">{selectedTemple.name}</h1>
+              <p className="text-sm text-muted-foreground">{selectedTemple.category} · {selectedTemple.location}, {selectedTemple.state}</p>
+            </div>
+            <Badge className={statusColors[selectedTemple.status]} variant="secondary">
+              {selectedTemple.status}
+            </Badge>
+          </div>
+
+          <Tabs defaultValue="overview">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="location">Location</TabsTrigger>
+              <TabsTrigger value="media">Media</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-4 mt-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    Temple Details
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { label: "Temple Name", value: selectedTemple.name },
+                      { label: "Category", value: selectedTemple.category },
+                      { label: "Status", value: selectedTemple.status },
+                      { label: "Last Updated", value: selectedTemple.lastUpdated },
+                      { label: "Contributors", value: String(selectedTemple.contributorCount) },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className="font-medium">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="glass-card rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Link2 className="h-4 w-4 text-primary" />
+                    Linked Tenant
+                  </h4>
+                  {selectedTemple.linkedTenant ? (
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between py-1.5">
+                        <span className="text-muted-foreground">Tenant Name</span>
+                        <span className="font-medium">{selectedTemple.linkedTenant}</span>
+                      </div>
+                      <div className="flex justify-between py-1.5">
+                        <span className="text-muted-foreground">Status</span>
+                        <Badge className="bg-success/10 text-success" variant="secondary">Active</Badge>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <p className="text-sm text-muted-foreground mb-3">No tenant linked</p>
+                      <Button size="sm" variant="outline">Link Tenant</Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="location" className="space-y-4 mt-4">
+              <div className="glass-card rounded-xl p-4 space-y-3">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  Location Details
+                </h4>
+                <div className="space-y-2 text-sm">
+                  {[
+                    { label: "City", value: selectedTemple.location },
+                    { label: "State", value: selectedTemple.state },
+                    { label: "Country", value: "India" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
+                      <span className="text-muted-foreground">{item.label}</span>
+                      <span className="font-medium">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground mt-4">
+                  <MapPin className="h-6 w-6 mx-auto mb-2" />
+                  Map view placeholder
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="media" className="space-y-4 mt-4">
+              <div className="glass-card rounded-xl p-4 space-y-3">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <Image className="h-4 w-4 text-primary" />
+                  Temple Photos
+                </h4>
+                <div className="grid grid-cols-3 gap-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="aspect-square rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                      Photo {i}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="history" className="space-y-4 mt-4">
+              <div className="glass-card rounded-xl p-4 space-y-3">
+                <h4 className="text-sm font-semibold">Audit Trail</h4>
+                <div className="space-y-3">
+                  {[
+                    { action: "Status changed to Published", by: "Admin A", date: selectedTemple.lastUpdated },
+                    { action: "Photos updated (3 added)", by: "Contributor B", date: "Jan 28, 2026" },
+                    { action: "Temple created", by: "Admin A", date: "Jan 15, 2026" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg border">
+                      <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm">{item.action}</p>
+                        <p className="text-xs text-muted-foreground">{item.by} · {item.date}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Add Temple Inline Page
+  if (showAddTemple) {
+    return (
+      <div className="p-6 lg:px-8 lg:pt-4 lg:pb-8 max-w-7xl">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
+          <div className="flex items-center gap-4 mb-6">
+            <Button variant="ghost" size="sm" onClick={() => setShowAddTemple(false)} className="gap-1.5">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-foreground">Add New Temple</h1>
+              <p className="text-sm text-muted-foreground">Add a new temple to the master directory</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => setShowAddTemple(false)}>Cancel</Button>
+              <Button onClick={() => setShowAddTemple(false)}>Save Temple</Button>
+            </div>
+          </div>
+
+          <Tabs defaultValue="basic">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="basic">Basic Info</TabsTrigger>
+              <TabsTrigger value="location">Location</TabsTrigger>
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="media">Media</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="basic" className="mt-4">
+              <div className="glass-card rounded-xl p-6 space-y-4">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  Temple Identity
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Temple Name *</Label>
+                    <Input placeholder="Enter temple name" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Alternate Name</Label>
+                    <Input placeholder="Enter alternate / local name" />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Category *</Label>
+                    <Select>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover">
+                        {categories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsAddCategoryOpen(true);
+                          }}
+                          className="w-full text-left px-2 py-1.5 text-sm text-primary hover:bg-muted rounded flex items-center gap-2"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                          Add New Category
+                        </button>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sub-Category</Label>
+                    <Input placeholder="e.g., Dwadash Jyotirlinga" />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Primary Deity *</Label>
+                    <Input placeholder="e.g., Lord Shiva" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Secondary Deities</Label>
+                    <Input placeholder="Comma-separated names" />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Established Year</Label>
+                    <Input placeholder="e.g., 1600 CE" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Temple Style</Label>
+                    <Input placeholder="e.g., Dravidian, Nagara" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Description *</Label>
+                  <Textarea placeholder="Brief description of the temple, its significance, and history" rows={4} />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="location" className="mt-4">
+              <div className="glass-card rounded-xl p-6 space-y-4">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-primary" />
+                  Address & Location
+                </h3>
+                <div className="space-y-2">
+                  <Label>Address Line 1 *</Label>
+                  <Input placeholder="Street address" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Address Line 2</Label>
+                  <Input placeholder="Landmark / area" />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>City *</Label>
+                    <Input placeholder="e.g., Madurai" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>District</Label>
+                    <Input placeholder="e.g., Madurai" />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>State *</Label>
+                    <Input placeholder="e.g., Tamil Nadu" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Country *</Label>
+                    <Input placeholder="e.g., India" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Pincode</Label>
+                    <Input placeholder="e.g., 625001" />
+                  </div>
+                </div>
+                <h3 className="text-sm font-semibold pt-2 flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  Geo Coordinates
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>GPS Latitude</Label>
+                    <Input placeholder="e.g., 9.9195" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>GPS Longitude</Label>
+                    <Input placeholder="e.g., 78.1193" />
+                  </div>
+                </div>
+                <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
+                  <MapPin className="h-6 w-6 mx-auto mb-2" />
+                  Click to pin location on map
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="details" className="mt-4">
+              <div className="glass-card rounded-xl p-6 space-y-4">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  Additional Details
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Temple Timings</Label>
+                    <Input placeholder="e.g., 6:00 AM - 9:00 PM" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Darshan Duration</Label>
+                    <Input placeholder="e.g., 30 min average" />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Festivals / Key Events</Label>
+                    <Textarea placeholder="List major festivals celebrated at this temple" rows={3} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Special Poojas / Sevas</Label>
+                    <Textarea placeholder="List special poojas or sevas offered" rows={3} />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Nearest Railway Station</Label>
+                    <Input placeholder="e.g., Madurai Junction" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nearest Airport</Label>
+                    <Input placeholder="e.g., Madurai Airport" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>How to Reach</Label>
+                  <Textarea placeholder="Travel directions and transportation options" rows={3} />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Website URL</Label>
+                    <Input placeholder="https://" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Contact Phone</Label>
+                    <Input placeholder="+91 XXXXXXXXXX" />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="media" className="mt-4">
+              <div className="glass-card rounded-xl p-6 space-y-4">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <Image className="h-4 w-4 text-primary" />
+                  Photos & Media
+                </h3>
+                <div className="space-y-2">
+                  <Label>Temple Photos (Minimum 3) *</Label>
+                  <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
+                    <Upload className="h-6 w-6 mx-auto mb-2" />
+                    <p>Drag & drop photos or click to browse</p>
+                    <p className="text-xs mt-1">JPG, PNG up to 5MB each</p>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Temple Logo</Label>
+                    <div className="border-2 border-dashed rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
+                      <Upload className="h-5 w-5 mx-auto mb-1" />Upload logo
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Cover Image</Label>
+                    <div className="border-2 border-dashed rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
+                      <Upload className="h-5 w-5 mx-auto mb-1" />Upload cover image
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Virtual Tour Link (Optional)</Label>
+                  <Input placeholder="https://..." />
+                </div>
+                <div className="space-y-2">
+                  <Label>YouTube Video Link (Optional)</Label>
+                  <Input placeholder="https://youtube.com/..." />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-4">
+              <div className="glass-card rounded-xl p-6 space-y-4">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-primary" />
+                  Visibility & Settings
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Initial Status *</Label>
+                    <Select>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover">
+                        <SelectItem value="Published">Published</SelectItem>
+                        <SelectItem value="Hidden">Hidden</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Source</Label>
+                    <Input placeholder="e.g., Manual entry, Import" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Tags</Label>
+                  <Input placeholder="Comma-separated tags, e.g., UNESCO, Heritage, Pilgrimage" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Internal Notes</Label>
+                  <Textarea placeholder="Any internal notes for the admin team" rows={3} />
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 lg:px-8 lg:pt-4 lg:pb-8 max-w-7xl">
@@ -90,7 +527,6 @@ const Temples = () => {
             <p className="text-sm text-muted-foreground">Master directory of published temples</p>
           </div>
           <div className="flex items-center gap-2">
-            {/* Bulk Actions Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-1.5">
@@ -114,7 +550,7 @@ const Temples = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button size="sm" className="gap-1.5" onClick={() => setIsAddOpen(true)}>
+            <Button size="sm" className="gap-1.5" onClick={() => setShowAddTemple(true)}>
               <Plus className="h-3.5 w-3.5" />
               Add Temple
             </Button>
@@ -122,71 +558,7 @@ const Temples = () => {
         </div>
       </motion.div>
 
-      {/* Add Temple Dialog */}
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent className="sm:max-w-lg bg-card max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add New Temple</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="temple-name">Temple Name</Label>
-              <Input id="temple-name" placeholder="Enter temple name" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="location">City</Label>
-                <Input id="location" placeholder="e.g., Madurai" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
-                <Input id="state" placeholder="e.g., TN" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select>
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover">
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setIsAddCategoryOpen(true);
-                    }}
-                    className="w-full text-left px-2 py-1.5 text-sm text-primary hover:bg-muted rounded flex items-center gap-2"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add New Category
-                  </button>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea id="description" placeholder="Brief description of the temple" rows={3} />
-            </div>
-
-            {/* Custom Fields Section */}
-            <CustomFieldsSection 
-              fields={customFields} 
-              onFieldsChange={setCustomFields} 
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-            <Button onClick={() => setIsAddOpen(false)}>Add Temple</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Category Dialog (Nested) */}
+      {/* Add Category Dialog */}
       <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
         <DialogContent className="sm:max-w-md bg-card">
           <DialogHeader>
@@ -296,7 +668,7 @@ const Temples = () => {
             </thead>
             <tbody className="divide-y">
               {filtered.map((row) => (
-                <tr key={row.id} className="hover:bg-muted/20 transition-colors">
+                <tr key={row.id} className="hover:bg-muted/20 transition-colors cursor-pointer" onClick={() => setSelectedTemple(row)}>
                   <td className="px-4 py-3">
                     <div>
                       <p className="text-sm font-medium text-foreground">{row.name}</p>
@@ -331,7 +703,7 @@ const Temples = () => {
                       {row.contributorCount}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="p-1.5 rounded hover:bg-muted transition-colors">
