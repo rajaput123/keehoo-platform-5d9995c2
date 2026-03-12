@@ -187,6 +187,7 @@ const DirectOnboarding = () => {
   const [selectedOnboarding, setSelectedOnboarding] = useState<typeof recentOnboardings[0] | null>(null);
   const [showRazorpayForm, setShowRazorpayForm] = useState(false);
   const [razorpayInput, setRazorpayInput] = useState("");
+  const [savedRazorpayId, setSavedRazorpayId] = useState("");
 
   const totalSteps = steps.length;
 
