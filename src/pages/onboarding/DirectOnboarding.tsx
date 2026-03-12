@@ -74,9 +74,7 @@ const recentOnboardings = [
     adminName: "Rajesh Nair",
     adminEmail: "rajesh@tdb.org",
     adminMobile: "+91 9876543210",
-    bankName: "State Bank of India",
-    accountNumber: "XXXX4567",
-    ifscCode: "SBIN0004567",
+    razorpayAccountId: "acc_TDB00012345",
   },
   { 
     id: "ONB-2000", 
@@ -93,9 +91,7 @@ const recentOnboardings = [
     adminName: "Sundar Rajan",
     adminEmail: "sundar@hrce.org",
     adminMobile: "+91 9876543211",
-    bankName: "Indian Bank",
-    accountNumber: "XXXX8901",
-    ifscCode: "IDIB0008901",
+    razorpayAccountId: "acc_HRCE0067890",
   },
   { 
     id: "ONB-1999", 
@@ -112,9 +108,7 @@ const recentOnboardings = [
     adminName: "Biswajit Mohapatra",
     adminEmail: "biswajit@sjta.org",
     adminMobile: "+91 9876543212",
-    bankName: "UCO Bank",
-    accountNumber: "XXXX2345",
-    ifscCode: "UCBA0002345",
+    razorpayAccountId: "acc_SJTA0023456",
   },
 ];
 
@@ -392,13 +386,11 @@ const DirectOnboarding = () => {
               <div className="glass-card rounded-xl p-4 space-y-3">
                 <h4 className="text-sm font-semibold flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-primary" />
-                  Bank Details
+                  Payment Gateway
                 </h4>
                 <div className="space-y-2 text-sm">
                   {[
-                    { label: "Bank Name", value: selectedOnboarding.bankName },
-                    { label: "Account Number", value: selectedOnboarding.accountNumber },
-                    { label: "IFSC Code", value: selectedOnboarding.ifscCode },
+                    { label: "Razorpay Account ID", value: selectedOnboarding.razorpayAccountId || "Not Assigned" },
                   ].map((item, i) => (
                     <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
                       <span className="text-muted-foreground">{item.label}</span>
@@ -638,24 +630,9 @@ const DirectOnboarding = () => {
 
               {currentStep === 6 && (
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold">Bank Account Details</h3>
+                  <h3 className="text-sm font-semibold">Payment Gateway</h3>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Account Holder Name *</Label><Input placeholder="Enter account holder name" /></div>
-                    <div className="space-y-2"><Label>Bank Name *</Label><Input placeholder="Enter bank name" /></div>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Account Number *</Label><Input placeholder="Enter account number" /></div>
-                    <div className="space-y-2"><Label>IFSC Code *</Label><Input placeholder="e.g. SBIN0001234" /></div>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Account Type</Label><SearchableSelect options={accountTypeOptions} placeholder="Select type" onValueChange={() => {}} /></div>
-                    <div className="space-y-2"><Label>UPI ID (Optional)</Label><Input placeholder="e.g. temple@upi" /></div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Upload Cancelled Cheque *</Label>
-                    <div className="border-2 border-dashed rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
-                      <Upload className="h-5 w-5 mx-auto mb-1" />Upload cancelled cheque image
-                    </div>
+                    <div className="space-y-2"><Label>Razorpay Account ID *</Label><Input placeholder="e.g. acc_XXXXXXXXXXXXXX" /></div>
                   </div>
                   <h3 className="text-sm font-semibold pt-2">Payment Settings</h3>
                   <div className="glass-card rounded-xl p-4 space-y-3">
