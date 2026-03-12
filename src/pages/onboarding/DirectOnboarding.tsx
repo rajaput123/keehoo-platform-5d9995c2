@@ -384,19 +384,26 @@ const DirectOnboarding = () => {
 
             <TabsContent value="bank" className="space-y-4 mt-4">
               <div className="glass-card rounded-xl p-4 space-y-3">
-                <h4 className="text-sm font-semibold flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-primary" />
-                  Payment Gateway
-                </h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-primary" />
+                    Payment Gateway
+                  </h4>
+                  {selectedOnboarding.razorpayAccountId ? (
+                    <Button size="sm" variant="outline" className="text-xs" onClick={() => {}}>
+                      <FileText className="h-3 w-3 mr-1" /> Edit
+                    </Button>
+                  ) : (
+                    <Button size="sm" className="text-xs" onClick={() => {}}>
+                      <Plus className="h-3 w-3 mr-1" /> Add Razorpay Account ID
+                    </Button>
+                  )}
+                </div>
                 <div className="space-y-2 text-sm">
-                  {[
-                    { label: "Razorpay Account ID", value: selectedOnboarding.razorpayAccountId || "Not Assigned" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
-                      <span className="text-muted-foreground">{item.label}</span>
-                      <span className="font-mono">{item.value}</span>
-                    </div>
-                  ))}
+                  <div className="flex justify-between py-1.5">
+                    <span className="text-muted-foreground">Razorpay Account ID</span>
+                    <span className="font-mono">{selectedOnboarding.razorpayAccountId || "Not Assigned"}</span>
+                  </div>
                 </div>
               </div>
             </TabsContent>
