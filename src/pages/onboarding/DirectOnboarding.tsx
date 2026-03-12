@@ -185,6 +185,8 @@ const DirectOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [selectedOnboarding, setSelectedOnboarding] = useState<typeof recentOnboardings[0] | null>(null);
+  const [showRazorpayForm, setShowRazorpayForm] = useState(false);
+  const [razorpayInput, setRazorpayInput] = useState("");
 
   const totalSteps = steps.length;
 
@@ -383,28 +385,44 @@ const DirectOnboarding = () => {
             </TabsContent>
 
             <TabsContent value="bank" className="space-y-4 mt-4">
-              <div className="glass-card rounded-xl p-4 space-y-3">
+              <div className="glass-card rounded-xl p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold flex items-center gap-2">
                     <CreditCard className="h-4 w-4 text-primary" />
                     Payment Gateway
                   </h4>
-                  {selectedOnboarding.razorpayAccountId ? (
-                    <Button size="sm" variant="outline" className="text-xs" onClick={() => {}}>
-                      <FileText className="h-3 w-3 mr-1" /> Edit
-                    </Button>
-                  ) : (
-                    <Button size="sm" className="text-xs" onClick={() => {}}>
+                </div>
+
+                {!showRazorpayForm ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center space-y-3">
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">No Razorpay Account linked</p>
+                    <Button size="sm" onClick={() => { setShowRazorpayForm(true); setRazorpayInput(selectedOnboarding?.razorpayAccountId || ""); }}>
                       <Plus className="h-3 w-3 mr-1" /> Add Razorpay Account ID
                     </Button>
-                  )}
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between py-1.5">
-                    <span className="text-muted-foreground">Razorpay Account ID</span>
-                    <span className="font-mono">{selectedOnboarding.razorpayAccountId || "Not Assigned"}</span>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-4 border border-border rounded-lg p-4">
+                    <div className="space-y-2">
+                      <Label>Razorpay Account ID *</Label>
+                      <Input
+                        placeholder="Add Razorpay Account ID"
+                        value={razorpayInput}
+                        onChange={(e) => setRazorpayInput(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => setShowRazorpayForm(false)}>
+                        <Check className="h-3 w-3 mr-1" /> Save
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setShowRazorpayForm(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </TabsContent>
 
