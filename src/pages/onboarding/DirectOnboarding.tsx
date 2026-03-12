@@ -632,7 +632,7 @@ const DirectOnboarding = () => {
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold">Payment Gateway</h3>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Razorpay Account ID *</Label><Input placeholder="e.g. acc_XXXXXXXXXXXXXX" /></div>
+                    <div className="space-y-2"><Label>Razorpay Account ID *</Label><Input placeholder="Add Razorpay Account ID" /></div>
                   </div>
                   <h3 className="text-sm font-semibold pt-2">Payment Settings</h3>
                   <div className="glass-card rounded-xl p-4 space-y-3">
