@@ -636,24 +636,9 @@ const DirectOnboarding = () => {
 
               {currentStep === 6 && (
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold">Bank Account Details</h3>
+                  <h3 className="text-sm font-semibold">Payment Gateway</h3>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Account Holder Name *</Label><Input placeholder="Enter account holder name" /></div>
-                    <div className="space-y-2"><Label>Bank Name *</Label><Input placeholder="Enter bank name" /></div>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Account Number *</Label><Input placeholder="Enter account number" /></div>
-                    <div className="space-y-2"><Label>IFSC Code *</Label><Input placeholder="e.g. SBIN0001234" /></div>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Account Type</Label><SearchableSelect options={accountTypeOptions} placeholder="Select type" onValueChange={() => {}} /></div>
-                    <div className="space-y-2"><Label>UPI ID (Optional)</Label><Input placeholder="e.g. temple@upi" /></div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Upload Cancelled Cheque *</Label>
-                    <div className="border-2 border-dashed rounded-lg p-4 text-center text-sm text-muted-foreground cursor-pointer hover:bg-muted/50">
-                      <Upload className="h-5 w-5 mx-auto mb-1" />Upload cancelled cheque image
-                    </div>
+                    <div className="space-y-2"><Label>Razorpay Account ID *</Label><Input placeholder="e.g. acc_XXXXXXXXXXXXXX" /></div>
                   </div>
                   <h3 className="text-sm font-semibold pt-2">Payment Settings</h3>
                   <div className="glass-card rounded-xl p-4 space-y-3">
