@@ -108,9 +108,7 @@ const recentOnboardings = [
     adminName: "Biswajit Mohapatra",
     adminEmail: "biswajit@sjta.org",
     adminMobile: "+91 9876543212",
-    bankName: "UCO Bank",
-    accountNumber: "XXXX2345",
-    ifscCode: "UCBA0002345",
+    razorpayAccountId: "acc_SJTA0023456",
   },
 ];
 
