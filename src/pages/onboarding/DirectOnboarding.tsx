@@ -187,6 +187,7 @@ const DirectOnboarding = () => {
   const [selectedOnboarding, setSelectedOnboarding] = useState<typeof recentOnboardings[0] | null>(null);
   const [showRazorpayForm, setShowRazorpayForm] = useState(false);
   const [razorpayInput, setRazorpayInput] = useState("");
+  const [savedRazorpayId, setSavedRazorpayId] = useState("");
 
   const totalSteps = steps.length;
 
@@ -393,14 +394,24 @@ const DirectOnboarding = () => {
                   </h4>
                 </div>
 
-                {!showRazorpayForm ? (
+                {!showRazorpayForm && !savedRazorpayId ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center space-y-3">
                     <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                       <CreditCard className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <p className="text-sm text-muted-foreground">No Razorpay Account linked</p>
-                    <Button size="sm" onClick={() => { setShowRazorpayForm(true); setRazorpayInput(selectedOnboarding?.razorpayAccountId || ""); }}>
+                    <Button size="sm" onClick={() => { setShowRazorpayForm(true); setRazorpayInput(""); }}>
                       <Plus className="h-3 w-3 mr-1" /> Add Razorpay Account ID
+                    </Button>
+                  </div>
+                ) : !showRazorpayForm && savedRazorpayId ? (
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Razorpay Account ID</p>
+                      <p className="text-sm font-mono font-medium">{savedRazorpayId}</p>
+                    </div>
+                    <Button size="sm" variant="outline" className="text-xs" onClick={() => { setShowRazorpayForm(true); setRazorpayInput(savedRazorpayId); }}>
+                      <FileText className="h-3 w-3 mr-1" /> Edit
                     </Button>
                   </div>
                 ) : (
@@ -414,7 +425,7 @@ const DirectOnboarding = () => {
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => setShowRazorpayForm(false)}>
+                      <Button size="sm" onClick={() => { setSavedRazorpayId(razorpayInput); setShowRazorpayForm(false); }}>
                         <Check className="h-3 w-3 mr-1" /> Save
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => setShowRazorpayForm(false)}>
