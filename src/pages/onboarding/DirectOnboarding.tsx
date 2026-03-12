@@ -392,13 +392,11 @@ const DirectOnboarding = () => {
               <div className="glass-card rounded-xl p-4 space-y-3">
                 <h4 className="text-sm font-semibold flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-primary" />
-                  Bank Details
+                  Payment Gateway
                 </h4>
                 <div className="space-y-2 text-sm">
                   {[
-                    { label: "Bank Name", value: selectedOnboarding.bankName },
-                    { label: "Account Number", value: selectedOnboarding.accountNumber },
-                    { label: "IFSC Code", value: selectedOnboarding.ifscCode },
+                    { label: "Razorpay Account ID", value: selectedOnboarding.razorpayAccountId || "Not Assigned" },
                   ].map((item, i) => (
                     <div key={i} className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
                       <span className="text-muted-foreground">{item.label}</span>
