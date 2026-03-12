@@ -74,9 +74,7 @@ const recentOnboardings = [
     adminName: "Rajesh Nair",
     adminEmail: "rajesh@tdb.org",
     adminMobile: "+91 9876543210",
-    bankName: "State Bank of India",
-    accountNumber: "XXXX4567",
-    ifscCode: "SBIN0004567",
+    razorpayAccountId: "acc_TDB00012345",
   },
   { 
     id: "ONB-2000", 
