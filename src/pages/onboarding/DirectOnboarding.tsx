@@ -91,9 +91,7 @@ const recentOnboardings = [
     adminName: "Sundar Rajan",
     adminEmail: "sundar@hrce.org",
     adminMobile: "+91 9876543211",
-    bankName: "Indian Bank",
-    accountNumber: "XXXX8901",
-    ifscCode: "IDIB0008901",
+    razorpayAccountId: "acc_HRCE0067890",
   },
   { 
     id: "ONB-1999", 
